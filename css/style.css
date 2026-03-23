@@ -25,6 +25,7 @@
 
   --header-height: 64px;
   --transition-fast: 0.3s ease;
+  --gallery-gap: 10px; /* PADDING POINT OF CONTROL: default gallery/layout item gap on mobile */
 }
 
 /* =============================
@@ -571,14 +572,14 @@ body.page.home .site-header {
 /* Masonry Gallery */
 .masonry-gallery {
   display: flex;
-  gap: 5px;
+  gap: var(--gallery-gap);
 }
 
 .masonry-column {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--gallery-gap);
 }
 
 .gallery-item {
@@ -764,8 +765,16 @@ body.page.writing.alaskanpanhandle .writing-cover {
   margin-bottom: calc(-1 * var(--writing-shell-gap));
 }
 
-body.page.writing.alaskanpanhandle .site-header a,
-body.page.writing.alaskanpanhandle .site-header button,
+body.page.writing.alaskanpanhandle .writing-cover-copy {
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+body.page.writing.alaskanpanhandle .writing-cover-copy.is-ready {
+  opacity: 1;
+}
+
+body.page.writing.alaskanpanhandle .logo,
 body.page.writing.alaskanpanhandle .hamburger span {
   color: #fff;
 }
@@ -776,6 +785,19 @@ body.page.writing.alaskanpanhandle .menu-underline {
 
 body.page.writing.alaskanpanhandle .writing-section.theme-dark + .writing-section.theme-dark {
   margin-top: calc(-1 * var(--writing-shell-gap));
+}
+
+body.page.writing .writing-section > .writing-hero + .writing-copy,
+body.page.writing .writing-section > .writing-hero + .writing-split,
+body.page.writing .writing-section > .writing-hero + .writing-figure,
+body.page.writing .writing-section > .writing-hero + .writing-gallery,
+body.page.writing .writing-section > .writing-hero + .dual-layout,
+body.page.writing .writing-section > .writing-hero + .copy-box {
+  margin-top: calc(var(--writing-shell-gap) - var(--writing-section-gap));
+}
+
+body.page.writing.alaskanpanhandle .writing-shell > .writing-section.theme-dark:last-child {
+  box-shadow: 0 100vh 0 100vh #000;
 }
 
 body.page.writing.hawaiibigisland .dual-layout.dual-match-heights {
@@ -794,6 +816,10 @@ body.page.writing.hawaiibigisland .dual-layout.dual-match-heights .dual-caption.
 /* Thailand page spacing tweaks */
 body.page.writing.thailand .writing-shell {
   gap: 50px;
+}
+
+body.page.writing.thailand .writing-shell > .writing-hero + .writing-section {
+  margin-top: calc(var(--writing-shell-gap) - 50px);
 }
 
 body.page.writing.thailand .writing-section {
@@ -817,6 +843,14 @@ body.page.writing.hawaiibigisland .writing-section {
 body.page.writing.hawaiibigisland .writing-section > * {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+body.page.writing.hawaiibigisland .writing-section > .writing-section-title + :is(.writing-copy, .writing-gallery, .writing-figure, .dual-layout, .writing-split, .copy-box, .writing-subheading, .writing-note, p.writing-caption) {
+  margin-top: 0;
+}
+
+body.page.writing.hawaiibigisland .writing-section > .writing-section-title + :is(.writing-copy, .writing-gallery, .writing-figure, .dual-layout, .copy-box) {
+  padding-top: 0;
 }
 
 body.page.writing.hawaiibigisland .writing-copy {
@@ -849,8 +883,15 @@ body.page.writing .writing-copy + .copy-box.medium {
 .writing-split {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 26px;
+  gap: var(--gallery-gap);
   align-items: start;
+}
+
+.writing-split.medium {
+  width: 100%;
+  margin: 0;
+  padding: var(--writing-medium-pad-block) var(--writing-medium-pad-inline);
+  box-sizing: border-box;
 }
 
 .writing-split.reverse .writing-copy {
@@ -874,7 +915,7 @@ body.page.writing .writing-copy + .copy-box.medium {
 .writing-gallery {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: var(--gallery-gap);
 }
 
 .writing-gallery.columns-2 {
@@ -1072,48 +1113,51 @@ body.page.writing .writing-figure img {
   margin: 0;
 }
 
+.writing-section {
+  --writing-scroll-fade-rgb: 255, 255, 255;
+}
+
+.writing-copy-scroll {
+  position: relative;
+  min-width: 0;
+}
+
+.writing-copy-scroll-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
 @media (min-width: 768px) {
-  .writing-copy-scroll.is-scroll {
+  .writing-copy-scroll.is-scroll .writing-copy-scroll-inner {
     overflow-y: auto;
-    padding-right: 6px;
+    padding-right: 10px;
     padding-bottom: 10px;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.35) transparent;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    transition: -webkit-mask-image 200ms ease, mask-image 200ms ease;
+    overscroll-behavior: contain;
   }
 
-  .writing-copy-scroll.is-scroll.at-bottom {
-    -webkit-mask-image: none;
-    mask-image: none;
+  .writing-copy-scroll.is-scroll::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 10px;
+    bottom: 0;
+    height: 42px;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(var(--writing-scroll-fade-rgb), 0) 0%,
+      rgba(var(--writing-scroll-fade-rgb), 0.92) 74%,
+      rgba(var(--writing-scroll-fade-rgb), 1) 100%
+    );
+    opacity: 1;
+    transition: opacity 200ms ease;
   }
 
-  .writing-copy-scroll.is-scroll::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .writing-copy-scroll.is-scroll::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.35);
-    border-radius: 999px;
-  }
-
-  body.page.writing.dark .writing-copy-scroll.is-scroll {
-    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
-  }
-
-  body.page.writing.dark .writing-copy-scroll.is-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.35);
-  }
-
-  body.page.writing.dark .writing-copy-scroll.is-scroll {
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+  .writing-copy-scroll.is-scroll.at-bottom::after {
+    opacity: 0;
   }
 }
 
@@ -1218,7 +1262,7 @@ body.page.writing .writing-figure img {
   display: grid;
   grid-template-columns: 1fr;
   column-gap: clamp(28px, 6vw, 96px);
-  row-gap: 14px; /* controls padding between dual layout and caption */
+  row-gap: var(--gallery-gap); /* stacked spacing on mobile/tablet */
   align-items: stretch;
 }
 
@@ -1334,6 +1378,7 @@ body.page.writing .dual-layout .dual-media > .writing-figure img {
 }
 
 .writing-section.theme-dark {
+  --writing-scroll-fade-rgb: 0, 0, 0;
   background: #000;
   color: var(--color-text-light);
   width: 100vw;
@@ -1356,14 +1401,32 @@ body.page.writing .dual-layout .dual-media > .writing-figure img {
   color: rgba(255, 255, 255, 0.75);
 }
 
+.writing-section.theme-light {
+  background: var(--color-bg-light);
+  color: var(--color-text-dark);
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 45px 20px 40px 20px;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+.writing-section.theme-light .writing-section-title {
+  color: var(--color-text-dark);
+}
+
+.writing-section.theme-light .writing-subsubheading {
+  color: rgba(17, 17, 17, 0.65);
+}
+
 .gallery-2x2.fill-second .writing-figure.span-rows {
   grid-row: span 2;
 }
 
 .gallery-2x2.fill-second {
   grid-auto-rows: auto;
-  row-gap: 16px;
-  column-gap: 16px;
+  row-gap: var(--gallery-gap);
+  column-gap: var(--gallery-gap);
 }
 
 .gallery-2x2.fill-second .writing-figure img {
@@ -1376,6 +1439,16 @@ body.page.writing .gallery-2x2.fill-second .writing-figure img {
   height: auto;
   object-fit: contain;
   display: block;
+}
+
+.gallery-1-2 .writing-figure.span-rows {
+  grid-row: span 2;
+}
+
+.gallery-1-2 {
+  grid-auto-rows: auto;
+  row-gap: var(--gallery-gap);
+  column-gap: var(--gallery-gap);
 }
 
 .writing-caption.writing-caption-wide {
@@ -1406,9 +1479,31 @@ body.page.writing .gallery-2x2.fill-second .writing-figure img {
 }
 
 @media (max-width: 767px) {
+  body.page.writing .writing-split {
+    row-gap: var(--writing-section-gap);
+    column-gap: 0;
+  }
+
+  body.page.writing.hawaiibigisland .dual-layout.dual-match-heights .dual-left .writing-gallery {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  body.page.writing.hawaiibigisland .dual-layout.dual-match-heights .dual-caption.dual-left {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  body.page.writing .writing-gallery:has(.writing-figure .writing-paragraph) {
+    gap: var(--writing-section-gap);
+  }
+
   .triple-layout {
     grid-template-columns: 1fr;
-    gap: 22px;
+    gap: var(--gallery-gap);
   }
 
   .triple-layout .triple-image-1,
@@ -1540,26 +1635,33 @@ body.lightbox-open {
 
 .about-inner {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   min-height: calc(100vh - var(--header-height));
   padding: 45px 60px 60px 60px;
   gap: 60px;
 }
 
 .about-photo {
-  flex-shrink: 1;
-  overflow: visible;
+  width: 45%;
+  flex: 0 0 45%;
+  overflow: hidden;
+  align-self: stretch;
+  min-width: 0;
 }
 
 .about-photo img {
-  max-height: calc(100vh - var(--header-height) - 45px - 60px);
-  max-width: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 .about-text {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1760,6 +1862,100 @@ body.yellow .hamburger span {
 
 /* Contact Mobile */
 @media (max-width: 767px) {
+  .writing-section.theme-dark {
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 45px 20px 40px 20px;
+  }
+
+  .writing-section.theme-light {
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 45px 20px 40px 20px;
+  }
+
+  body.page.writing .writing-copy,
+  body.page.writing .writing-copy.medium,
+  body.page.writing .writing-copy.small,
+  body.page.writing .writing-copy.xsmall {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.page.writing .writing-split.medium:has(.writing-copy),
+  body.page.writing .dual-layout.medium:has(.writing-copy) {
+    padding: 0;
+  }
+
+  body.page.writing.alaskanpanhandle .writing-split.reverse.split-60-40.medium .writing-media {
+    padding: var(--writing-medium-pad-block) var(--writing-medium-pad-inline);
+    box-sizing: border-box;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-stack.dual-scroll-match {
+    row-gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-stack.dual-scroll-match .dual-media.dual-right {
+    gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy {
+    grid-template-columns: 1fr;
+    row-gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-left,
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-right {
+    grid-column: 1;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-left {
+    grid-row: 1;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-right {
+    grid-row: 2;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure:nth-child(3) {
+    order: 5;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure:nth-child(4) {
+    order: 6;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure:nth-child(5) {
+    order: 3;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure:nth-child(6) {
+    order: 4;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gallery-gap);
+    align-items: flex-start;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure {
+    flex: 0 0 auto;
+  }
+
+  body.page.writing.thailand .way-of-water-gallery .writing-figure img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+  }
+
   .contact-inner {
     flex-direction: column;
     padding: 45px 20px 40px 20px;
@@ -1830,7 +2026,8 @@ body.yellow .hamburger span {
   }
 
   .writing-shell {
-    gap: 56px;
+    --writing-shell-gap: 56px;
+    gap: var(--writing-shell-gap);
   }
 
   .writing-title {
@@ -1838,7 +2035,12 @@ body.yellow .hamburger span {
   }
 
   .writing-split {
-    gap: 20px;
+    gap: var(--gallery-gap);
+  }
+
+  body.page.writing .writing-split {
+    row-gap: var(--writing-section-gap);
+    column-gap: 0;
   }
 }
 
@@ -1872,11 +2074,15 @@ body.light {
      TABLET LAYOUT
   ============================= */
 
+  :root {
+    --gallery-gap: 11px; /* PADDING POINT OF CONTROL: default gallery/layout item gap on tablet */
+  }
+
   .masonry-gallery {
-    gap: 10px;
+    gap: var(--gallery-gap);
   }
   .masonry-column {
-    gap: 10px;
+    gap: var(--gallery-gap);
   }
   .gallery-page {
   padding: 45px 60px 60px 60px; /* changed from 40px to 60px on left/right */
@@ -1890,6 +2096,10 @@ body.light {
     padding: 45px 60px 40px 60px;
   }
 
+  .writing-section.theme-light {
+    padding: 45px 60px 40px 60px;
+  }
+
   .writing-gallery.columns-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1899,10 +2109,57 @@ body.light {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .writing-gallery.gallery-1-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dual-layout.dual-gallery-1-2 {
+    --dual-gallery-gap: clamp(28px, 6vw, 96px);
+    column-gap: var(--dual-gallery-gap);
+    grid-template-columns:
+      minmax(0, calc(50% + 8px - var(--dual-gallery-gap)))
+      minmax(0, calc(50% - 8px));
+    align-items: start;
+  }
+
+  .dual-layout.dual-gallery-1-2 .dual-left {
+    grid-column: 1;
+  }
+
+  .dual-layout.dual-gallery-1-2 .dual-right {
+    grid-column: 2;
+  }
+
+  .dual-layout.dual-gallery-1-2 .dual-left {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dual-layout.dual-gallery-1-2 .dual-left .writing-copy {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dual-layout.dual-gallery-1-2 .dual-right {
+    min-width: 0;
+  }
+
+  .dual-layout.dual-gallery-1-2 .gallery-1-2 {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    align-items: start;
+  }
+
+  .dual-layout.dual-gallery-1-2 .gallery-1-2 > .writing-figure {
+    margin: 0;
+  }
+
   .writing-gallery.gallery-2x1.justified {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
+    flex-wrap: wrap;
+    gap: var(--gallery-gap);
     align-items: flex-start;
   }
 
@@ -1919,8 +2176,8 @@ body.light {
 
   .writing-gallery.gallery-3x1.justified {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
+    flex-wrap: wrap;
+    gap: var(--gallery-gap);
     align-items: flex-start;
   }
 
@@ -1958,16 +2215,85 @@ body.light {
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  body.page.writing.hawaiibigisland .dual-layout.dual-match-heights .dual-left .writing-gallery {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  body.page.writing.hawaiibigisland .dual-layout.dual-match-heights .dual-caption.dual-left {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-stack.dual-scroll-match {
+    row-gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-stack.dual-scroll-match .dual-media.dual-right {
+    gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy {
+    grid-template-columns: 1fr;
+    row-gap: var(--writing-section-gap);
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-left,
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-right {
+    grid-column: 1;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-left {
+    grid-row: 1;
+  }
+
+  body.page.writing.alaskanpanhandle .dual-layout.dual-wrap-copy .dual-right {
+    grid-row: 2;
+  }
+
+  .dual-layout:has(.dual-left .writing-copy):has(.dual-right .writing-gallery),
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .writing-copy),
+  .dual-layout:has(.dual-left.copy-box):has(.dual-right .writing-gallery),
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right.copy-box),
+  .dual-layout:has(.dual-left .copy-box):has(.dual-right .writing-gallery),
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .copy-box) {
+    grid-template-columns: 1fr;
+  }
+
+  .dual-layout:has(.dual-left .writing-copy):has(.dual-right .writing-gallery) .dual-left,
+  .dual-layout:has(.dual-left .writing-copy):has(.dual-right .writing-gallery) .dual-right,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .writing-copy) .dual-left,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .writing-copy) .dual-right,
+  .dual-layout:has(.dual-left.copy-box):has(.dual-right .writing-gallery) .dual-left,
+  .dual-layout:has(.dual-left.copy-box):has(.dual-right .writing-gallery) .dual-right,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right.copy-box) .dual-left,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right.copy-box) .dual-right,
+  .dual-layout:has(.dual-left .copy-box):has(.dual-right .writing-gallery) .dual-left,
+  .dual-layout:has(.dual-left .copy-box):has(.dual-right .writing-gallery) .dual-right,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .copy-box) .dual-left,
+  .dual-layout:has(.dual-left .writing-gallery):has(.dual-right .copy-box) .dual-right {
+    grid-column: 1;
+  }
+}
+
 @media (min-width: 1024px) {
   /* =============================
      DESKTOP LAYOUT
   ============================= */
+
+  :root {
+    --gallery-gap: 15px; /* PADDING POINT OF CONTROL: default gallery/layout item gap on desktop */
+  }
   
   .masonry-gallery {
-    gap: 15px;
+    gap: var(--gallery-gap);
   }
   .masonry-column {
-    gap: 15px;
+    gap: var(--gallery-gap);
   }
 
   .writing-split {
@@ -2035,6 +2361,43 @@ body.light {
 
   body.page.writing .writing-split .writing-copy {
     display: block;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy {
+    display: block;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy .dual-right {
+    float: right;
+    width: calc(50% - 8px);
+    margin: 0 0 14px var(--dual-gallery-gap, clamp(28px, 6vw, 96px));
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy .dual-left {
+    display: block;
+    min-width: 0;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy .dual-left .writing-copy {
+    display: block;
+    width: auto;
+    max-width: none;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy .dual-left .writing-copy > * + * {
+    margin-top: 22px;
+  }
+
+  body.page.writing .dual-layout.dual-wrap-copy .gallery-1-2 {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
   }
 
   .dual-layout {

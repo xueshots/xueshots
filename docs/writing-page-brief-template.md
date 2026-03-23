@@ -93,14 +93,14 @@ The rapid glacial recession is obvious in the image, at a rate of 30-50 feet per
 ### Section 4
 - `heading`: A FLOODED FOREST
 - `theme`: `dark`
-- `layout`: `dual-layout` `copy` `gallery-2x2`
+- `layout`: `dual-layout` `copy` `gallery-1,2`
   - `copy`: In August 2024, the glacial dam of Suicide Basin collapsed, releasing 14.6 billion gallons of accumulated meltwater down Mendenhall Valley. Over 100 homes and multiple roads in Northern Juneau were inundated, as well as most Mendenhall Glacier hiking trails. 
   
   I visited the area soon after the catastrophe. Although the water had retreated in Juneau, Mendenhall Lake remained swollen. Entire trails were flooded. The flora in the image aren’t aquatic plants - they’re the tips of trees. A Sitka spruce (Picea sitchensis) pokes out in the center, while cow parsnip (Heracleum maximum) are fully submerged in the foreground. Dead debris from the forest floats through milky glacial water. 
   
   Located in the panhandle of Alaska, the valley isn’t new to basin flooding. In fact, this has occurred every year since 2011. But, like most climate-driven disasters, the scale and damage increased over time. As Mendenhall Glacier retreats, more of the basin opens up to collect a greater amount of water. Higher temperatures mean that the basin fills quicker; the glacial wall holding back the volume is thinner. 
-  - `gallery-2x2` `metro` `all-aligned`
-    - `layout_description`: New gallery type called `metro`. It behaves just like a `jusified` gallery, but with matching image widths in each column instead of image heights in each row. Remember that the widths of each column do not need to match. 
+  - `gallery-1,2`
+    - `layout_description`: New gallery type defined by x,y where x is the amount of images in the first column and y is the amount of images in the second column. In this gallery, the images should be sized so that all sides are aligned with each other. There is no requirement for the columns to have consistent widths, or the rows to have consistent height. The images can be sized whichever way to meet these requirements. Do not crop the images. The `desktop_order` defines the images in a round robin-type method, but instead of going left to right then to the lower row, it goes up to down then to the next column. 
     - `desktop_order`: Alaska-3 Web, Alaska-2 Web, `none`, Alaska-4 Web
     - `mobile_order`: Same as above
 - `layout`: `gallery-2x2`

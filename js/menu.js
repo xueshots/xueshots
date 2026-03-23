@@ -87,6 +87,15 @@ document.addEventListener("keydown", (e) => {
 ============================ */
 const writingToggle = document.querySelector(".writing-toggle");
 const writingBack = document.getElementById("writingBack");
+const desktopWritingTrigger = document.querySelector(".writing-nav > a");
+
+if (desktopWritingTrigger) {
+  desktopWritingTrigger.addEventListener("click", (e) => {
+    if (window.innerWidth >= 1024) {
+      e.preventDefault();
+    }
+  });
+}
 
 if (writingToggle) {
   writingToggle.addEventListener("click", (e) => {
@@ -277,6 +286,10 @@ window.addEventListener("resize", () => {
    SCROLL TO TOP
 ============================ */
 function initScrollToTop() {
+  if (document.body.classList.contains("about") || document.body.classList.contains("contact")) {
+    return;
+  }
+
   const button = document.createElement("button");
   button.className = "scroll-to-top";
   button.setAttribute("type", "button");
@@ -297,3 +310,30 @@ function initScrollToTop() {
 }
 
 initScrollToTop();
+
+/* ============================
+   COVER COPY REVEAL
+============================ */
+function initCoverCopyReveal() {
+  const coverImage = document.querySelector("body.page.writing.alaskanpanhandle .writing-cover-media img");
+  const coverCopy = document.querySelector("body.page.writing.alaskanpanhandle .writing-cover-copy");
+
+  if (!coverImage || !coverCopy) return;
+
+  const reveal = () => {
+    requestAnimationFrame(() => {
+      coverCopy.classList.add("is-ready");
+    });
+  };
+
+  if (coverImage.complete && coverImage.naturalWidth) {
+    reveal();
+    return;
+  }
+
+  coverImage.addEventListener("load", reveal, { once: true });
+  coverImage.addEventListener("error", reveal, { once: true });
+  window.addEventListener("pageshow", reveal, { once: true });
+}
+
+initCoverCopyReveal();

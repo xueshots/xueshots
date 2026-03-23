@@ -260,8 +260,11 @@ if (justifiedGalleries.length) {
     justifiedGalleries.forEach((gallery) => {
       resetJustified(gallery);
 
-      if (!justifiedQuery.matches) return;
-      const perRow = gallery.classList.contains('gallery-3x1') ? 3 : 2;
+      const supportsMobileJustified = gallery.classList.contains('way-of-water-gallery');
+      if (!justifiedQuery.matches && !supportsMobileJustified) return;
+      const perRow = gallery.classList.contains('gallery-3x1')
+        ? (window.innerWidth < 768 && supportsMobileJustified ? 2 : 3)
+        : 2;
       if (!gallery.classList.contains('gallery-2x1') && !gallery.classList.contains('gallery-3x1')) return;
 
       const figures = Array.from(gallery.querySelectorAll('.writing-figure'));
@@ -295,6 +298,8 @@ if (justifiedGalleries.length) {
         });
       }
     });
+
+    window.dispatchEvent(new Event('writing-gallery-layout'));
   };
 
   let justifyTimeout;
@@ -314,6 +319,16 @@ if (justifiedGalleries.length) {
       img.addEventListener('load', scheduleJustified);
     });
   });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const justifiedObserver = new ResizeObserver(() => {
+      scheduleJustified();
+    });
+
+    justifiedGalleries.forEach((gallery) => {
+      justifiedObserver.observe(gallery);
+    });
+  }
 
   layoutJustified();
 }
@@ -401,26 +416,69 @@ if (metroGalleries.length) {
 ============================ */
 const dualScrollLayouts = Array.from(document.querySelectorAll('.dual-layout.dual-scroll-match'));
 
+function ensureScrollWrapperStructure(container, selector = '.writing-copy-scroll') {
+  if (!container) return null;
+
+  let wrapper = container.querySelector(`:scope > ${selector}`);
+  if (!wrapper) {
+    wrapper = document.createElement('div');
+    wrapper.className = selector.replace(/^\./, '');
+    const inner = document.createElement('div');
+    inner.className = 'writing-copy-scroll-inner';
+
+    while (container.firstChild) {
+      inner.appendChild(container.firstChild);
+    }
+
+    wrapper.appendChild(inner);
+    container.appendChild(wrapper);
+    return wrapper;
+  }
+
+  let inner = wrapper.querySelector(':scope > .writing-copy-scroll-inner');
+  if (!inner) {
+    inner = document.createElement('div');
+    inner.className = 'writing-copy-scroll-inner';
+
+    while (wrapper.firstChild) {
+      inner.appendChild(wrapper.firstChild);
+    }
+
+    wrapper.appendChild(inner);
+  }
+
+  return wrapper;
+}
+
+function getScrollInner(wrapper) {
+  return wrapper?.querySelector(':scope > .writing-copy-scroll-inner') || null;
+}
+
+function syncScrollState(wrapper, scroller) {
+  if (!wrapper || !scroller) return;
+  wrapper.classList.toggle(
+    'at-bottom',
+    scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1
+  );
+}
+
 if (dualScrollLayouts.length) {
   const dualScrollQuery = window.matchMedia('(min-width: 768px)');
 
   const ensureDualCopyWrapper = (copy) => {
-    if (!copy || copy.querySelector('.writing-copy-scroll')) return;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'writing-copy-scroll';
-    while (copy.firstChild) {
-      wrapper.appendChild(copy.firstChild);
-    }
-    copy.appendChild(wrapper);
+    return ensureScrollWrapperStructure(copy);
   };
 
   const resetDualScroll = (layout) => {
     const wrappers = layout.querySelectorAll('.writing-copy-scroll');
     wrappers.forEach((wrapper) => {
+      const inner = getScrollInner(wrapper);
       wrapper.classList.remove('is-scroll');
       wrapper.classList.remove('at-bottom');
-      wrapper.style.maxHeight = '';
-      wrapper.style.overflowY = '';
+      if (inner) {
+        inner.style.maxHeight = '';
+        inner.style.overflowY = '';
+      }
     });
   };
 
@@ -435,9 +493,10 @@ if (dualScrollLayouts.length) {
       const copy = rightMedia?.querySelector('.writing-copy');
       if (!leftFigure || !rightMedia || !rightFigure || !copy) return;
 
-      ensureDualCopyWrapper(copy);
-      const wrapper = copy.querySelector('.writing-copy-scroll');
+      const wrapper = ensureDualCopyWrapper(copy);
       if (!wrapper) return;
+      const inner = getScrollInner(wrapper);
+      if (!inner) return;
 
       const leftHeight = leftFigure.getBoundingClientRect().height;
       const rightImageHeight = rightFigure.getBoundingClientRect().height;
@@ -452,15 +511,12 @@ if (dualScrollLayouts.length) {
       const available = leftHeight - rightImageHeight - gap - padTop - padBottom;
       if (available <= 0) return;
 
-      wrapper.style.maxHeight = `${available}px`;
+      inner.style.maxHeight = `${available}px`;
 
-      if (wrapper.scrollHeight > available + 1) {
+      if (inner.scrollHeight > available + 1) {
         wrapper.classList.add('is-scroll');
-        wrapper.style.overflowY = 'auto';
-        wrapper.classList.toggle(
-          'at-bottom',
-          wrapper.scrollTop + wrapper.clientHeight >= wrapper.scrollHeight - 1
-        );
+        inner.style.overflowY = 'auto';
+        syncScrollState(wrapper, inner);
       }
     });
   };
@@ -492,7 +548,7 @@ if (dualScrollLayouts.length) {
 const dualMatchLayouts = Array.from(document.querySelectorAll('.dual-layout.dual-match-heights'));
 
 if (dualMatchLayouts.length) {
-  const dualMatchQuery = window.matchMedia('(min-width: 768px)');
+  const dualMatchQuery = window.matchMedia('(min-width: 1024px)');
 
   const resetDualMatch = (layout) => {
     const leftGallery = layout.querySelector('.dual-media.dual-left .writing-gallery');
@@ -502,6 +558,7 @@ if (dualMatchLayouts.length) {
       leftGallery.style.marginRight = '';
     }
     layout.style.removeProperty('--left-gallery-width');
+    layout.style.removeProperty('--left-gallery-offset');
   };
 
   const layoutDualMatch = () => {
@@ -682,6 +739,128 @@ if (fillSecondGalleries.length) {
 }
 
 /* ============================
+   GALLERY-1-2 WRITING GALLERIES
+============================ */
+const galleryOneTwo = Array.from(document.querySelectorAll('.writing-gallery.gallery-1-2'));
+
+if (galleryOneTwo.length) {
+  const galleryOneTwoQuery = window.matchMedia('(min-width: 768px)');
+
+  const resetGalleryOneTwo = (gallery) => {
+    gallery.style.gridTemplateColumns = '';
+    gallery.style.gridTemplateRows = '';
+
+    const figures = gallery.querySelectorAll('.writing-figure');
+    figures.forEach((figure) => {
+      figure.style.width = '';
+      figure.style.height = '';
+      figure.style.gridColumn = '';
+      figure.style.gridRow = '';
+    });
+
+    const images = gallery.querySelectorAll('img');
+    images.forEach((img) => {
+      img.style.width = '';
+      img.style.height = '';
+      img.style.objectFit = '';
+    });
+  };
+
+  const layoutGalleryOneTwo = () => {
+    galleryOneTwo.forEach((gallery) => {
+      resetGalleryOneTwo(gallery);
+      if (!galleryOneTwoQuery.matches) return;
+
+      const figures = Array.from(gallery.querySelectorAll('.writing-figure')).filter(
+        (figure) => !figure.classList.contains('is-empty')
+      );
+      if (figures.length < 3) return;
+
+      const leftFigure = figures[0];
+      const rightTop = figures[1];
+      const rightBottom = figures[2];
+
+      const imgLeft = leftFigure.querySelector('img');
+      const imgTop = rightTop.querySelector('img');
+      const imgBottom = rightBottom.querySelector('img');
+
+      if (!imgLeft || !imgTop || !imgBottom) return;
+      if (!imgLeft.naturalWidth || !imgLeft.naturalHeight) return;
+      if (!imgTop.naturalWidth || !imgTop.naturalHeight) return;
+      if (!imgBottom.naturalWidth || !imgBottom.naturalHeight) return;
+
+      const styles = getComputedStyle(gallery);
+      const gapX = parseFloat(styles.columnGap || styles.gap || 0);
+      const gapY = parseFloat(styles.rowGap || styles.gap || 0);
+      const paddingLeft = parseFloat(styles.paddingLeft || 0);
+      const paddingRight = parseFloat(styles.paddingRight || 0);
+      const containerWidth = gallery.clientWidth - paddingLeft - paddingRight;
+
+      const rLeft = imgLeft.naturalWidth / imgLeft.naturalHeight;
+      const rTop = imgTop.naturalWidth / imgTop.naturalHeight;
+      const rBottom = imgBottom.naturalWidth / imgBottom.naturalHeight;
+      if (!rLeft || !rTop || !rBottom) return;
+
+      const denom = 1 + rLeft * ((1 / rTop) + (1 / rBottom));
+      const available = containerWidth - gapX - (rLeft * gapY);
+      if (!denom || available <= 0) return;
+
+      const rightWidth = available / denom;
+      if (rightWidth <= 0) return;
+
+      const topHeight = rightWidth / rTop;
+      const bottomHeight = rightWidth / rBottom;
+      const totalHeight = topHeight + bottomHeight + gapY;
+      const leftWidth = rLeft * totalHeight;
+
+      if (!Number.isFinite(leftWidth) || !Number.isFinite(rightWidth)) return;
+
+      gallery.style.gridTemplateColumns = `${leftWidth}px ${rightWidth}px`;
+      gallery.style.gridTemplateRows = `${topHeight}px ${bottomHeight}px`;
+
+      leftFigure.style.gridColumn = '1';
+      leftFigure.style.gridRow = '1 / span 2';
+      rightTop.style.gridColumn = '2';
+      rightTop.style.gridRow = '1';
+      rightBottom.style.gridColumn = '2';
+      rightBottom.style.gridRow = '2';
+
+      [leftFigure, rightTop, rightBottom].forEach((figure) => {
+        figure.style.width = '100%';
+        figure.style.height = '100%';
+      });
+
+      [imgLeft, imgTop, imgBottom].forEach((img) => {
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+      });
+    });
+  };
+
+  let galleryOneTwoTimeout;
+  const scheduleGalleryOneTwo = () => {
+    clearTimeout(galleryOneTwoTimeout);
+    galleryOneTwoTimeout = setTimeout(layoutGalleryOneTwo, 60);
+  };
+
+  window.addEventListener('resize', scheduleGalleryOneTwo);
+  galleryOneTwoQuery.addEventListener?.('change', scheduleGalleryOneTwo);
+  window.addEventListener('load', scheduleGalleryOneTwo);
+  window.addEventListener('pageshow', scheduleGalleryOneTwo);
+
+  galleryOneTwo.forEach((gallery) => {
+    const images = gallery.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.complete) return;
+      img.addEventListener('load', scheduleGalleryOneTwo);
+    });
+  });
+
+  scheduleGalleryOneTwo();
+}
+
+/* ============================
    GALLERY COPY SCROLL
 ============================ */
 const copyScrollGalleries = Array.from(document.querySelectorAll('.writing-gallery'));
@@ -693,14 +872,22 @@ if (copyScrollGalleries.length) {
     copyScrollGalleries.forEach((gallery) => {
       const figures = gallery.querySelectorAll('.writing-figure');
       figures.forEach((figure) => {
-        if (figure.querySelector('.writing-copy-scroll')) return;
         const paragraphs = Array.from(figure.querySelectorAll(':scope > .writing-paragraph'));
-        if (!paragraphs.length) return;
+        const existingWrapper = figure.querySelector(':scope > .writing-copy-scroll');
+        if (!paragraphs.length && !existingWrapper) return;
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'writing-copy-scroll';
-        figure.insertBefore(wrapper, paragraphs[0]);
-        paragraphs.forEach((p) => wrapper.appendChild(p));
+        if (!existingWrapper) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'writing-copy-scroll';
+          const inner = document.createElement('div');
+          inner.className = 'writing-copy-scroll-inner';
+          figure.insertBefore(wrapper, paragraphs[0]);
+          wrapper.appendChild(inner);
+          paragraphs.forEach((p) => inner.appendChild(p));
+          return;
+        }
+
+        ensureScrollWrapperStructure(figure);
       });
     });
   };
@@ -711,14 +898,16 @@ if (copyScrollGalleries.length) {
     copyScrollGalleries.forEach((gallery) => {
       const wrappers = gallery.querySelectorAll('.writing-copy-scroll');
       wrappers.forEach((wrapper) => {
+        const inner = getScrollInner(wrapper);
         wrapper.classList.remove('is-scroll');
         wrapper.classList.remove('at-bottom');
-        wrapper.style.maxHeight = '';
-        wrapper.style.overflowY = '';
+        if (!inner) return;
+        inner.style.maxHeight = '';
+        inner.style.overflowY = '';
 
         if (!copyScrollQuery.matches) return;
 
-        const sample = wrapper.querySelector('.writing-paragraph');
+        const sample = inner.querySelector('.writing-paragraph');
         if (!sample) return;
 
         const computed = getComputedStyle(sample);
@@ -729,15 +918,12 @@ if (copyScrollGalleries.length) {
         }
 
         const maxHeight = lineHeight * 10;
-        wrapper.style.maxHeight = `${maxHeight}px`;
+        inner.style.maxHeight = `${maxHeight}px`;
 
-        if (wrapper.scrollHeight > maxHeight + 1) {
+        if (inner.scrollHeight > maxHeight + 1) {
           wrapper.classList.add('is-scroll');
-          wrapper.style.overflowY = 'auto';
-          wrapper.classList.toggle(
-            'at-bottom',
-            wrapper.scrollTop + wrapper.clientHeight >= wrapper.scrollHeight - 1
-          );
+          inner.style.overflowY = 'auto';
+          syncScrollState(wrapper, inner);
         }
       });
     });
@@ -745,11 +931,9 @@ if (copyScrollGalleries.length) {
 
   const handleScroll = (event) => {
     const target = event.target;
-    if (!target.classList.contains('writing-copy-scroll')) return;
-    target.classList.toggle(
-      'at-bottom',
-      target.scrollTop + target.clientHeight >= target.scrollHeight - 1
-    );
+    if (!target.classList.contains('writing-copy-scroll-inner')) return;
+    const wrapper = target.closest('.writing-copy-scroll');
+    syncScrollState(wrapper, target);
   };
 
   let copyScrollTimeout;
@@ -761,6 +945,24 @@ if (copyScrollGalleries.length) {
   window.addEventListener('resize', scheduleCopyScroll);
   copyScrollQuery.addEventListener?.('change', scheduleCopyScroll);
   window.addEventListener('load', updateCopyScroll);
+  window.addEventListener('writing-gallery-layout', scheduleCopyScroll);
   document.addEventListener('scroll', handleScroll, true);
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const copyScrollObserver = new ResizeObserver(() => {
+      scheduleCopyScroll();
+    });
+
+    copyScrollGalleries.forEach((gallery) => {
+      copyScrollObserver.observe(gallery);
+      const figuresWithCopy = gallery.querySelectorAll('.writing-figure');
+      figuresWithCopy.forEach((figure) => {
+        if (figure.querySelector(':scope > .writing-paragraph, :scope > .writing-copy-scroll')) {
+          copyScrollObserver.observe(figure);
+        }
+      });
+    });
+  }
+
   updateCopyScroll();
 }
