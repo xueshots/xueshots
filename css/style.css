@@ -419,7 +419,7 @@ main {
   opacity: 0;
   backface-visibility: hidden;
   will-change: opacity;
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.70s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .js img.is-loaded:not(.lightbox-image) {
