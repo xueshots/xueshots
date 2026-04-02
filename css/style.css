@@ -2747,6 +2747,8 @@ body.page.writing .dual-layout .writing-copy.xsmall {
 }
 
 body.page.writing .writing-copy.subsubheading-block {
+  margin-top: var(--writing-pad-block);
+  padding-top: 0;
   padding-bottom: 0;
 }
 
@@ -2755,6 +2757,33 @@ body.page.writing .writing-copy.subsubheading-block + .writing-copy.medium,
 body.page.writing .writing-copy.subsubheading-block + .writing-copy.small,
 body.page.writing .writing-copy.subsubheading-block + .writing-copy.xsmall {
   padding-top: 0;
+}
+
+@media (max-width: 767px) {
+  body.page.writing .writing-copy,
+  body.page.writing .writing-copy.medium,
+  body.page.writing .writing-copy.small,
+  body.page.writing .writing-copy.xsmall {
+    padding: var(--writing-pad-block) 0;
+  }
+
+  body.page.writing .writing-copy.subsubheading-block,
+  body.page.writing .writing-copy.medium.subsubheading-block,
+  body.page.writing .writing-copy.small.subsubheading-block,
+  body.page.writing .writing-copy.xsmall.subsubheading-block {
+    padding: 0;
+  }
+
+  body.page.writing .writing-split .writing-copy,
+  body.page.writing .writing-split .writing-copy.medium,
+  body.page.writing .writing-split .writing-copy.small,
+  body.page.writing .writing-split .writing-copy.xsmall,
+  body.page.writing .dual-layout .writing-copy,
+  body.page.writing .dual-layout .writing-copy.medium,
+  body.page.writing .dual-layout .writing-copy.small,
+  body.page.writing .dual-layout .writing-copy.xsmall {
+    padding: 0 0 var(--writing-pad-block);
+  }
 }
 
 .scroll-to-top {
