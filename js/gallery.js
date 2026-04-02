@@ -14,6 +14,42 @@ let activeGroup = [];
 let activeIndex = 0;
 let allowNavigation = false;
 
+function loadMasonryImage(img, revealIndividually = true) {
+  const imageSrc = img.dataset.src;
+  if (!imageSrc) return;
+
+  img.src = imageSrc;
+  img.removeAttribute('data-src');
+
+  if (revealIndividually && typeof window.initImageReveal === 'function') {
+    window.initImageReveal(img);
+  }
+}
+
+function waitForMasonryImage(img) {
+  if (img.complete) {
+    if (img.naturalWidth > 0 && typeof img.decode === 'function') {
+      return img.decode().catch(() => {});
+    }
+
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const finish = () => {
+      if (img.naturalWidth > 0 && typeof img.decode === 'function') {
+        img.decode().catch(() => {}).finally(resolve);
+        return;
+      }
+
+      resolve();
+    };
+
+    img.addEventListener('load', finish, { once: true });
+    img.addEventListener('error', resolve, { once: true });
+  });
+}
+
 const masonryLoadObserver = typeof IntersectionObserver === 'function'
   ? new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
@@ -25,11 +61,7 @@ const masonryLoadObserver = typeof IntersectionObserver === 'function'
           return;
         }
 
-        img.src = img.dataset.src;
-        img.removeAttribute('data-src');
-        if (typeof window.initImageReveal === 'function') {
-          window.initImageReveal(img);
-        }
+        loadMasonryImage(img);
 
         observer.unobserve(entry.target);
       });
@@ -164,6 +196,7 @@ if (galleries.length > 0) {
     state.images = sourceImages.filter((filename) => filename !== null);
 
     let renderedIndex = 0;
+    const masonryItems = [];
 
     sourceImages.forEach((filename, sourceIndex) => {
       if (filename === null) return;
@@ -182,24 +215,15 @@ if (galleries.length > 0) {
 
       if (meta) {
         const aspectRatio = `${meta.width} / ${meta.height}`;
-        item.classList.add('has-aspect-ratio');
         item.style.setProperty('--gallery-item-aspect-ratio', aspectRatio);
         img.width = meta.width;
         img.height = meta.height;
+        img.style.aspectRatio = aspectRatio;
       }
 
       item.appendChild(img);
       state.columns[sourceIndex % state.columns.length].appendChild(item);
-
-      if (masonryLoadObserver) {
-        masonryLoadObserver.observe(item);
-      } else {
-        img.src = imageSrc;
-        img.removeAttribute('data-src');
-        if (typeof window.initImageReveal === 'function') {
-          window.initImageReveal(img);
-        }
-      }
+      masonryItems.push(item);
 
       if (hasLightbox) {
         const openIndex = renderedIndex;
@@ -210,6 +234,44 @@ if (galleries.length > 0) {
       }
 
       renderedIndex += 1;
+    });
+
+    const initialItems = masonryItems.filter((item) => {
+      const rect = item.getBoundingClientRect();
+      return rect.bottom > -40 && rect.top < window.innerHeight + 160;
+    });
+
+    const initialItemSet = new Set(initialItems);
+    const initialImages = initialItems
+      .map((item) => item.querySelector('img[data-src]'))
+      .filter(Boolean);
+
+    initialImages.forEach((img) => {
+      loadMasonryImage(img, false);
+    });
+
+    Promise.allSettled(initialImages.map((img) => waitForMasonryImage(img))).then(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          initialImages.forEach((img) => {
+            img.classList.add('is-loaded');
+          });
+        });
+      });
+    });
+
+    masonryItems.forEach((item) => {
+      if (initialItemSet.has(item)) return;
+
+      const img = item.querySelector('img[data-src]');
+      if (!img) return;
+
+      if (masonryLoadObserver) {
+        masonryLoadObserver.observe(item);
+        return;
+      }
+
+      loadMasonryImage(img);
     });
   }
 
