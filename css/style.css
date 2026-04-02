@@ -431,6 +431,19 @@ main {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
+.js .intro-slide img:not(.lightbox-image),
+.js .writing-cover-media img:not(.lightbox-image),
+.js .intro-slide img.is-loaded:not(.lightbox-image),
+.js .writing-cover-media img.is-loaded:not(.lightbox-image) {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.js .intro-slide img:not(.lightbox-image),
+.js .writing-cover-media img:not(.lightbox-image) {
+  will-change: opacity;
+  transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* =============================
    HOMEPAGE INTRO SLIDE
 ============================= */
