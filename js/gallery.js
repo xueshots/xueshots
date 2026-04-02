@@ -149,6 +149,9 @@ if (galleries.length > 0) {
       img.src = state.imagePath + filename;
       img.alt = '';
       img.loading = 'lazy';
+      if (typeof window.initImageReveal === 'function') {
+        window.initImageReveal(img);
+      }
 
       item.appendChild(img);
       state.columns[sourceIndex % state.columns.length].appendChild(item);

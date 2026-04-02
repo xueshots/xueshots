@@ -16,6 +16,64 @@ function getScrollbarWidth() {
 }
 
 /* ============================
+   IMAGE REVEAL
+============================ */
+function finishImageReveal(image) {
+  requestAnimationFrame(() => {
+    image.classList.add("is-loaded");
+  });
+}
+
+function revealImage(image) {
+  if (typeof image.decode === "function") {
+    image.decode().catch(() => {}).finally(() => {
+      finishImageReveal(image);
+    });
+    return;
+  }
+
+  finishImageReveal(image);
+}
+
+function initImageReveal(image) {
+  if (!(image instanceof HTMLImageElement) || image.classList.contains("lightbox-image")) {
+    return;
+  }
+
+  if (!image.dataset.revealBound) {
+    image.dataset.revealBound = "true";
+    image.addEventListener("load", () => {
+      revealImage(image);
+    });
+    image.addEventListener("error", () => {
+      image.classList.add("is-loaded");
+    });
+  }
+
+  image.classList.remove("is-loaded");
+
+  if (!image.getAttribute("src")) {
+    image.classList.add("is-loaded");
+    return;
+  }
+
+  if (image.complete && image.naturalWidth > 0) {
+    revealImage(image);
+  }
+}
+
+function initImageRevealSet(root = document) {
+  root.querySelectorAll("img").forEach((image) => {
+    initImageReveal(image);
+  });
+}
+
+window.initImageReveal = initImageReveal;
+window.initImageRevealSet = initImageRevealSet;
+
+initImageRevealSet();
+
+/* ============================
    MOBILE MENU TOGGLE
 ============================ */
 hamburger.addEventListener("click", toggleMenu);

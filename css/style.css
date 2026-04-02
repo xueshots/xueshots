@@ -413,6 +413,21 @@ main {
 }
 
 /* =============================
+   IMAGE REVEAL
+============================= */
+.js img:not(.lightbox-image) {
+  opacity: 0;
+  transform: translateZ(0) scale(1.01);
+  will-change: opacity, transform;
+  transition: opacity 0.45s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.js img.is-loaded:not(.lightbox-image) {
+  opacity: 1;
+  transform: translateZ(0) scale(1);
+}
+
+/* =============================
    HOMEPAGE INTRO SLIDE
 ============================= */
 .intro-slide {
@@ -421,6 +436,7 @@ main {
   z-index: 500;
   overflow: hidden;
   cursor: pointer;
+  background: #000;
 }
 
 .intro-slide img {
