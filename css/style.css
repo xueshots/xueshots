@@ -417,7 +417,7 @@ main {
 ============================= */
 .js img:not(.lightbox-image) {
   opacity: 0;
-  transform: translate3d(0, 0, 0) scale(0.800);
+  transform: translate3d(0, 0, 0) scale(0.890);
   transform-origin: center center;
   backface-visibility: hidden;
   will-change: opacity, transform;
