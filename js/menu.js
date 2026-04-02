@@ -20,7 +20,9 @@ function getScrollbarWidth() {
 ============================ */
 function finishImageReveal(image) {
   requestAnimationFrame(() => {
-    image.classList.add("is-loaded");
+    requestAnimationFrame(() => {
+      image.classList.add("is-loaded");
+    });
   });
 }
 
