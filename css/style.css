@@ -415,16 +415,44 @@ main {
 /* =============================
    IMAGE REVEAL
 ============================= */
+.js .intro-slide,
+.js .carousel-slide,
+.js .gallery-item,
+.js .about-photo,
+.js .contact-photo,
+.js .writing-cover-media {
+  background-color: var(--image-placeholder, #111111);
+}
+
+.js .writing-figure {
+  position: relative;
+}
+
+.js .writing-figure::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: var(--image-aspect-ratio, 1 / 1);
+  background-color: var(--image-placeholder, #111111);
+  pointer-events: none;
+}
+
+.js .writing-figure > img {
+  position: relative;
+  z-index: 1;
+}
+
 .js img:not(.lightbox-image) {
   opacity: 0;
-  transform: translateZ(0) scale(1.01);
-  will-change: opacity, transform;
-  transition: opacity 0.45s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  backface-visibility: hidden;
+  will-change: opacity;
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .js img.is-loaded:not(.lightbox-image) {
   opacity: 1;
-  transform: translateZ(0) scale(1);
 }
 
 /* =============================

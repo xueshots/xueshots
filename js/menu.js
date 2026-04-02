@@ -6,6 +6,7 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
+const IMAGE_META = window.__IMAGE_META__ || {};
 
 let isMenuOpen = false;
 let isMenuAnimating = false;
@@ -18,6 +19,46 @@ function getScrollbarWidth() {
 /* ============================
    IMAGE REVEAL
 ============================ */
+function normalizeImagePath(path) {
+  if (!path) return "";
+
+  try {
+    return decodeURIComponent(new URL(path, window.location.href).pathname.replace(/^\/+/, ""));
+  } catch {
+    return path.replace(/^\/+/, "");
+  }
+}
+
+function getImageMeta(image) {
+  const directSrc = normalizeImagePath(image.getAttribute("src"));
+  const currentSrc = normalizeImagePath(image.currentSrc);
+  return IMAGE_META[directSrc] || IMAGE_META[currentSrc] || null;
+}
+
+function getImageRevealHost(image) {
+  return image.closest(
+    ".intro-slide, .carousel-slide, .gallery-item, .writing-figure, .about-photo, .contact-photo, .writing-cover-media"
+  );
+}
+
+function applyImageMeta(image) {
+  const meta = getImageMeta(image);
+  const host = getImageRevealHost(image);
+
+  if (host && meta?.placeholder) {
+    host.style.setProperty("--image-placeholder", meta.placeholder);
+  }
+
+  if (host && meta) {
+    host.style.setProperty("--image-aspect-ratio", `${meta.width} / ${meta.height}`);
+  }
+
+  if (meta && !image.hasAttribute("width") && !image.hasAttribute("height")) {
+    image.setAttribute("width", String(meta.width));
+    image.setAttribute("height", String(meta.height));
+  }
+}
+
 function finishImageReveal(image) {
   requestAnimationFrame(() => {
     image.classList.add("is-loaded");
@@ -39,6 +80,8 @@ function initImageReveal(image) {
   if (!(image instanceof HTMLImageElement) || image.classList.contains("lightbox-image")) {
     return;
   }
+
+  applyImageMeta(image);
 
   if (!image.dataset.revealBound) {
     image.dataset.revealBound = "true";
