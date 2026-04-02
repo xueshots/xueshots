@@ -8,10 +8,36 @@ const lightboxClose = document.querySelector('.lightbox-close');
 const lightboxPrev = document.querySelector('.lightbox-prev');
 const lightboxNext = document.querySelector('.lightbox-next');
 const hasLightbox = Boolean(lightbox && lightboxImage && lightboxClose && lightboxPrev && lightboxNext);
+const imageMeta = window.__IMAGE_META__ || {};
 
 let activeGroup = [];
 let activeIndex = 0;
 let allowNavigation = false;
+
+const masonryLoadObserver = typeof IntersectionObserver === 'function'
+  ? new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const img = entry.target.querySelector('img[data-src]');
+        if (!img) {
+          observer.unobserve(entry.target);
+          return;
+        }
+
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+        if (typeof window.initImageReveal === 'function') {
+          window.initImageReveal(img);
+        }
+
+        observer.unobserve(entry.target);
+      });
+    }, {
+      rootMargin: '200px 0px 200px 0px',
+      threshold: 0
+    })
+  : null;
 
 function setLightboxImage() {
   if (!activeGroup[activeIndex]) return;
@@ -145,16 +171,35 @@ if (galleries.length > 0) {
       const item = document.createElement('div');
       item.className = 'gallery-item';
 
+      const imageSrc = state.imagePath + filename;
+      const meta = imageMeta[imageSrc] || null;
       const img = document.createElement('img');
-      img.src = state.imagePath + filename;
       img.alt = '';
+      img.decoding = 'async';
       img.loading = 'lazy';
-      if (typeof window.initImageReveal === 'function') {
-        window.initImageReveal(img);
+      img.setAttribute('fetchpriority', 'low');
+      img.dataset.src = imageSrc;
+
+      if (meta) {
+        const aspectRatio = `${meta.width} / ${meta.height}`;
+        item.classList.add('has-aspect-ratio');
+        item.style.setProperty('--gallery-item-aspect-ratio', aspectRatio);
+        img.width = meta.width;
+        img.height = meta.height;
       }
 
       item.appendChild(img);
       state.columns[sourceIndex % state.columns.length].appendChild(item);
+
+      if (masonryLoadObserver) {
+        masonryLoadObserver.observe(item);
+      } else {
+        img.src = imageSrc;
+        img.removeAttribute('data-src');
+        if (typeof window.initImageReveal === 'function') {
+          window.initImageReveal(img);
+        }
+      }
 
       if (hasLightbox) {
         const openIndex = renderedIndex;
