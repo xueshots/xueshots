@@ -417,13 +417,18 @@ main {
 ============================= */
 .js img:not(.lightbox-image) {
   opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.985);
+  transform-origin: center center;
   backface-visibility: hidden;
-  will-change: opacity;
-  transition: opacity 0.50s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.50s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.70s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .js img.is-loaded:not(.lightbox-image) {
   opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 /* =============================
