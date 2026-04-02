@@ -110,7 +110,7 @@ if (galleries.length > 0) {
     gallery,
     desktopImages: JSON.parse(gallery.dataset.imagesDesktop || '[]'),
     mobileImages: JSON.parse(gallery.dataset.imagesMobile || '[]'),
-    imagePath: gallery.dataset.imagePath || `../assets/images/${pageName}/`,
+    imagePath: gallery.dataset.imagePath || `assets/images/${pageName}/`,
     images: [],
     columns: []
   }));

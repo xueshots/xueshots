@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Xue.</title>
+  <title>Sports - Xue.</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@100..900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="page home dark mobile">
+<body class="page sports light">
 
 <button class="hamburger" aria-label="Open menu">
   <span></span>
@@ -80,76 +80,74 @@
     </div>
   </header>
 
-  <div class="intro-slide" id="introSlide">
-    <img src="../assets/images/index/RedBullHeavyMetal2025-16 Web Long.jpg" alt="" draggable="false">
-    <p class="intro-copyright">All Rights Reserved © Daniel Xue</p>
-    <button class="intro-arrow" id="introArrow">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <polyline points="8 2 16 12 8 22"/>
-      </svg>
-    </button>
-  </div>
+  <main class="gallery-page">
+    <div class="masonry-gallery" id="gallery"
+      data-images-desktop='[
+        "RedBullHeavyMetal2025-12 Web.jpg",
+        "RedBullDiving2024-2 Web.jpg",
+        "BostonBoxing2025-5 Web.jpg",
 
-  <div class="carousel-wrapper">
-    <div class="carousel">
-      <div class="carousel-track">
+        "RedBullHeavyMetal2025-6 Web.jpg",
+        "RedBullDiving2025-5 Web.jpg",
+        "RedBullHeavyMetal2025-5 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullDiving2024-1 Web.jpg" alt="" draggable="false">
-        </div>
+        "RedBullHeavyMetal2025-9 Web.jpg",
+        "BostonBoxing2025-10 Web.jpg",
+        "RedBullHeavyMetal2025-1 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullHeavyMetal2025-5 Web.jpg" alt="" draggable="false">
-        </div>
+        null,
+        null,
+        "BostonMarathon2024-5 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/BostonBoxing2025-5 Web.jpg" alt="" draggable="false">
-        </div>
+        null,
+        "RedBullDiving2025-13 Web.jpg",
+        "RedBullDiving2024-1 Web.jpg"
+      ]'
+      data-images-mobile='[
+        "RedBullHeavyMetal2025-12 Web.jpg",
+        "RedBullDiving2024-2 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullDiving2025-22 Web.jpg" alt="" draggable="false">
-        </div>
+        "BostonBoxing2025-5 Web.jpg",
+        "RedBullHeavyMetal2025-5 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullHeavyMetal2025-6 Web.jpg" alt="" draggable="false">
-        </div>
+        "RedBullHeavyMetal2025-6 Web.jpg",
+        "RedBullDiving2025-5 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullDiving2024-2 Web.jpg" alt="" draggable="false">
-        </div>
+        "RedBullHeavyMetal2025-1 Web.jpg",
+        "BostonBoxing2025-10 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullDiving2025-5 Web.jpg" alt="" draggable="false">
-        </div>
+        "RedBullDiving2025-13 Web.jpg",
+        "BostonMarathon2024-5 Web.jpg",
 
-        <div class="carousel-slide">
-          <img src="../assets/images/index/BostonBoxing2025-18 Web.jpg" alt="" draggable="false">
-        </div>
-
-        <div class="carousel-slide">
-          <img src="../assets/images/index/RedBullHeavyMetal2025-13 Web.jpg" alt="" draggable="false">
-        </div>
-
-      </div>
+        "RedBullHeavyMetal2025-9 Web.jpg",
+        "RedBullDiving2024-1 Web.jpg"
+      ]'>
     </div>
-
-    <button
-      class="carousel-autoplay-toggle is-playing"
-      id="carouselAutoplayToggle"
-      type="button"
-      aria-label="Pause autoplay"
-      aria-pressed="false"
-    >
-      <span class="carousel-autoplay-pause" aria-hidden="true">
-        <span></span>
-        <span></span>
-      </span>
-      <span class="carousel-autoplay-play" aria-hidden="true"></span>
-    </button>
-  </div>
+  </main>
 </div>
 
-<script src="../js/carousel.js"></script>
-<script src="../js/menu.js"></script>
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <line x1="4" y1="4" x2="20" y2="20"/>
+      <line x1="20" y1="4" x2="4" y2="20"/>
+    </svg>
+  </button>
+  <button class="lightbox-prev" aria-label="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <polyline points="15 4 9 12 15 20"/>
+    </svg>
+  </button>
+  <button class="lightbox-next" aria-label="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <polyline points="9 4 15 12 9 20"/>
+    </svg>
+  </button>
+  <img src="" alt="" class="lightbox-image">
+</div>
+
+<script src="js/menu.js"></script>
+<script src="js/gallery.js"></script>
 </body>
 </html>

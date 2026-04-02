@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Wildlife - Xue.</title>
+  <title>Contact - Xue.</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@100..900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
-<body class="page wildlife light">
+<body class="page contact yellow">
 
 <button class="hamburger" aria-label="Open menu">
   <span></span>
@@ -80,79 +81,41 @@
     </div>
   </header>
 
-  <main class="gallery-page">
-    <div class="masonry-gallery" id="gallery"
-      data-images-desktop='[
-        "Hawaii 2024-11 Web.jpg",
-        "Thailand2024-40 Web.jpg",
-        "Hawaii 2024-23 Web.jpg",
+  <main class="contact-page">
+    <div class="contact-inner">
 
-        "Alaska-30 Web.jpg",
-        "Hawaii 2024-22 Web.jpg",
-        "Hawaii 2024-9 Web.jpg",
+      <div class="contact-left">
+        <h1 class="contact-heading">Contact Me</h1>
+        <p class="contact-email-line">TO: <a href="mailto:xueshots@gmail.com" class="contact-email">XUESHOTS@GMAIL.COM</a></p>
 
-        "Thailand2024-39 Web.jpg",
-        "Hawaii 2024-41 Web.jpg",
-        "Thailand2024-15 Web.jpg",
+        <form class="contact-form" id="contactForm">
+          <div class="form-field">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com">
+          </div>
+          <div class="form-field">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" required placeholder="What's this about?">
+          </div>
+          <div class="form-field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required placeholder="Your message..."></textarea>
+          </div>
 
-        "Alaska-31 Web Long.jpg",
-        "Thailand2024-35 Web.jpg",
-        "Alaska-24 Web.jpg",
+          <div class="g-recaptcha" data-sitekey="6Lf2AngsAAAAAF5Aj6lysFJasZCTPCCkQLCS2Pw2"></div>
 
-        "Hawaii 2024-19 Web.jpg",
-        "Thailand2024-82 Web.jpg",
-        "Alaska-5 Web.jpg"
-      ]'
-      data-images-mobile='[
-        "Hawaii 2024-11 Web.jpg",
-        "Thailand2024-40 Web.jpg",
+          <button type="submit" class="contact-submit">SEND</button>
+        </form>
+      </div>
 
-        "Hawaii 2024-23 Web.jpg",
-        "Hawaii 2024-9 Web.jpg",
-        
-        "Alaska-30 Web.jpg",
-        "Hawaii 2024-22 Web.jpg",
+      <div class="contact-photo">
+        <img src="assets/images/contact/Hawaii 2024 Contact.jpg" alt="">
+      </div>
 
-        "Thailand2024-39 Web.jpg",
-        "Thailand2024-15 Web.jpg",
-
-        "Hawaii 2024-41 Web.jpg",
-        "Alaska-31 Web Long.jpg",
-        
-        "Hawaii 2024-19 Web.jpg",
-        "Thailand2024-35 Web.jpg",
-        
-        "Alaska-5 Web.jpg",
-        "Thailand2024-82 Web.jpg",
-        
-        "Alaska-24 Web.jpg"
-      ]'>
     </div>
   </main>
 </div>
 
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" aria-label="Close">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-      <line x1="4" y1="4" x2="20" y2="20"/>
-      <line x1="20" y1="4" x2="4" y2="20"/>
-    </svg>
-  </button>
-  <button class="lightbox-prev" aria-label="Previous">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-      <polyline points="15 4 9 12 15 20"/>
-    </svg>
-  </button>
-  <button class="lightbox-next" aria-label="Next">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-      <polyline points="9 4 15 12 9 20"/>
-    </svg>
-  </button>
-  <img src="" alt="" class="lightbox-image">
-</div>
-
-<script src="../js/menu.js"></script>
-<script src="../js/gallery.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>
