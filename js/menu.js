@@ -78,6 +78,14 @@ function getVisibleViewportHeight() {
   return window.innerHeight;
 }
 
+function getVisibleViewportWidth() {
+  if (window.visualViewport) {
+    return Math.round(window.visualViewport.width);
+  }
+
+  return window.innerWidth;
+}
+
 function getElementHeight(element) {
   if (!element) return 0;
   return element.getBoundingClientRect().height;
@@ -128,6 +136,7 @@ function getCenteredMenuPanelRequiredHeight(content, footer, footerBottom) {
 function clearMobileMenuFit() {
   if (!menu) return;
   menu.style.removeProperty("--mobile-menu-viewport-height");
+  menu.style.removeProperty("--mobile-menu-viewport-width");
   menu.style.removeProperty("--mobile-menu-fit-scale");
   menu.style.removeProperty("--mobile-menu-footer-bottom");
   menu.style.removeProperty("--mobile-menu-scroll-top");
@@ -143,8 +152,10 @@ function syncMobileMenuFit() {
   }
 
   const viewportHeight = getVisibleViewportHeight();
+  const viewportWidth = getVisibleViewportWidth();
 
   menu.style.setProperty("--mobile-menu-viewport-height", `${viewportHeight}px`);
+  menu.style.setProperty("--mobile-menu-viewport-width", `${viewportWidth}px`);
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
   menu.style.setProperty("--mobile-menu-footer-bottom", `${MOBILE_MENU_FOOTER_OFFSET}px`);
   menu.style.setProperty("--mobile-menu-scroll-top", `${MOBILE_MENU_SCROLL_TOP}px`);
