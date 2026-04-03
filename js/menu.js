@@ -9,33 +9,42 @@ const HAMBURGER_RIGHT = 60;
 
 function ensureMobileMenuStructure() {
   const menuMain = document.querySelector(".menu-main");
-  if (!menuMain) return;
+  if (menuMain) {
+    const hasMainLinksWrapper = Array.from(menuMain.children).some((child) =>
+      child.classList.contains("menu-main-links")
+    );
 
-  const hasMainLinksWrapper = Array.from(menuMain.children).some((child) =>
-    child.classList.contains("menu-main-links")
-  );
+    if (!hasMainLinksWrapper) {
+      const mainLinksWrapper = document.createElement("div");
+      mainLinksWrapper.className = "menu-main-links";
 
-  if (hasMainLinksWrapper) return;
+      const footer = Array.from(menuMain.children).find((child) =>
+        child.classList.contains("menu-footer")
+      );
 
-  const mainLinksWrapper = document.createElement("div");
-  mainLinksWrapper.className = "menu-main-links";
+      Array.from(menuMain.children).forEach((child) => {
+        if (child !== footer) {
+          mainLinksWrapper.appendChild(child);
+        }
+      });
 
-  const footer = Array.from(menuMain.children).find((child) =>
-    child.classList.contains("menu-footer")
-  );
-
-  Array.from(menuMain.children).forEach((child) => {
-    if (child !== footer) {
-      mainLinksWrapper.appendChild(child);
+      if (footer) {
+        menuMain.insertBefore(mainLinksWrapper, footer);
+      } else {
+        menuMain.appendChild(mainLinksWrapper);
+      }
     }
-  });
-
-  if (footer) {
-    menuMain.insertBefore(mainLinksWrapper, footer);
-    return;
   }
 
-  menuMain.appendChild(mainLinksWrapper);
+  const writingLinks = document.querySelector(".menu-writing-links");
+  const writingItems = writingLinks?.querySelector(".menu-writing-items");
+
+  if (writingLinks && writingItems) {
+    while (writingItems.firstChild) {
+      writingLinks.insertBefore(writingItems.firstChild, writingItems);
+    }
+    writingItems.remove();
+  }
 }
 
 ensureMobileMenuStructure();
@@ -79,8 +88,16 @@ function getMobileMenuPanelRequiredHeight(panel, content, footer) {
   const paddingTop = parseFloat(panelStyle.paddingTop) || 0;
   const paddingBottom = parseFloat(panelStyle.paddingBottom) || 0;
   const rowGap = parseFloat(panelStyle.rowGap) || 0;
+  const contentHeight = Array.from(content.children)
+    .filter((child) => window.getComputedStyle(child).display !== "none")
+    .reduce((total, child) => {
+      const childStyle = window.getComputedStyle(child);
+      const marginTop = parseFloat(childStyle.marginTop) || 0;
+      const marginBottom = parseFloat(childStyle.marginBottom) || 0;
+      return total + child.getBoundingClientRect().height + marginTop + marginBottom;
+    }, 0);
 
-  return paddingTop + paddingBottom + getElementHeight(content) + getElementHeight(footer) + rowGap;
+  return paddingTop + paddingBottom + contentHeight + getElementHeight(footer) + rowGap;
 }
 
 function clearMobileMenuFit() {
