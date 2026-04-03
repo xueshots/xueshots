@@ -6,6 +6,7 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
+const MOBILE_MENU_TOP_CLEARANCE = 72;
 
 function ensureMobileMenuStructure() {
   const menuMain = document.querySelector(".menu-main");
@@ -81,13 +82,15 @@ function getElementHeight(element) {
   return element.getBoundingClientRect().height;
 }
 
-function getMobileMenuPanelRequiredHeight(panel, content, footer) {
+function getMobileMenuPanelRequiredHeight(panel, content) {
   if (!panel || !content) return 0;
 
   const panelStyle = window.getComputedStyle(panel);
+  const contentStyle = window.getComputedStyle(content);
   const paddingTop = parseFloat(panelStyle.paddingTop) || 0;
   const paddingBottom = parseFloat(panelStyle.paddingBottom) || 0;
-  const rowGap = parseFloat(panelStyle.rowGap) || 0;
+  const contentPaddingTop = parseFloat(contentStyle.paddingTop) || 0;
+  const contentPaddingBottom = parseFloat(contentStyle.paddingBottom) || 0;
   const contentHeight = Array.from(content.children)
     .filter((child) => window.getComputedStyle(child).display !== "none")
     .reduce((total, child) => {
@@ -97,13 +100,15 @@ function getMobileMenuPanelRequiredHeight(panel, content, footer) {
       return total + child.getBoundingClientRect().height + marginTop + marginBottom;
     }, 0);
 
-  return paddingTop + paddingBottom + contentHeight + getElementHeight(footer) + rowGap;
+  return paddingTop + paddingBottom + contentPaddingTop + contentPaddingBottom + contentHeight;
 }
 
 function clearMobileMenuFit() {
   if (!menu) return;
   menu.style.removeProperty("--mobile-menu-viewport-height");
   menu.style.removeProperty("--mobile-menu-fit-scale");
+  menu.style.removeProperty("--mobile-menu-footer-bottom");
+  menu.style.removeProperty("--mobile-menu-edge-space");
 }
 
 function syncMobileMenuFit() {
@@ -121,8 +126,15 @@ function syncMobileMenuFit() {
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
 
   for (let pass = 0; pass < 2; pass += 1) {
-    const mainRequiredHeight = getMobileMenuPanelRequiredHeight(menuMain, menuMainLinks, menuMainFooter);
-    const writingRequiredHeight = getMobileMenuPanelRequiredHeight(menuWriting, menuWritingLinks, menuWritingFooter);
+    const footerBottom = Math.max(8, Math.round(10 * fitScale));
+    const footerHeight = Math.max(getElementHeight(menuMainFooter), getElementHeight(menuWritingFooter));
+    const edgeSpace = Math.max(MOBILE_MENU_TOP_CLEARANCE, footerHeight + footerBottom);
+
+    menu.style.setProperty("--mobile-menu-footer-bottom", `${footerBottom}px`);
+    menu.style.setProperty("--mobile-menu-edge-space", `${edgeSpace}px`);
+
+    const mainRequiredHeight = getMobileMenuPanelRequiredHeight(menuMain, menuMainLinks);
+    const writingRequiredHeight = getMobileMenuPanelRequiredHeight(menuWriting, menuWritingLinks);
     const requiredHeight = Math.max(mainRequiredHeight, writingRequiredHeight);
 
     if (!requiredHeight) {
