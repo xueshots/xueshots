@@ -353,7 +353,21 @@ const justifiedGalleries = Array.from(document.querySelectorAll('.writing-galler
 if (justifiedGalleries.length) {
   const justifiedQuery = window.matchMedia('(min-width: 768px)');
 
+  const unwrapJustifiedRows = (gallery) => {
+    const rows = Array.from(gallery.children).filter((child) => child.classList?.contains('justified-row'));
+
+    rows.forEach((row) => {
+      while (row.firstChild) {
+        gallery.insertBefore(row.firstChild, row);
+      }
+      row.remove();
+    });
+  };
+
   const resetJustified = (gallery) => {
+    unwrapJustifiedRows(gallery);
+    gallery.classList.remove('is-justified-active');
+
     const figures = gallery.querySelectorAll('.writing-figure');
     figures.forEach((figure) => {
       figure.style.width = '';
@@ -371,44 +385,73 @@ if (justifiedGalleries.length) {
     justifiedGalleries.forEach((gallery) => {
       resetJustified(gallery);
 
-      const supportsMobileJustified = gallery.classList.contains('way-of-water-gallery');
-      if (!justifiedQuery.matches && !supportsMobileJustified) return;
-      const perRow = gallery.classList.contains('gallery-3x1')
-        ? (window.innerWidth < 768 && supportsMobileJustified ? 2 : 3)
-        : 2;
+      if (!justifiedQuery.matches) return;
+
+      const perRow = gallery.classList.contains('gallery-3x1') ? 3 : 2;
       if (!gallery.classList.contains('gallery-2x1') && !gallery.classList.contains('gallery-3x1')) return;
 
       const figures = Array.from(gallery.querySelectorAll('.writing-figure'));
       const images = figures.map((figure) => figure.querySelector('img')).filter(Boolean);
 
       if (images.length < 2) return;
+      if (images.length % perRow !== 0) return;
       if (images.some((img) => !img.naturalWidth || !img.naturalHeight)) return;
 
       const styles = getComputedStyle(gallery);
-      const gap = parseFloat(styles.columnGap || styles.gap || 0);
+      const gap = Number.parseFloat(styles.columnGap || styles.gap || 0) || 0;
       const paddingLeft = parseFloat(styles.paddingLeft || 0);
       const paddingRight = parseFloat(styles.paddingRight || 0);
       const containerWidth = gallery.clientWidth - paddingLeft - paddingRight;
+      if (!Number.isFinite(containerWidth) || containerWidth <= 0) return;
+
+      const rowLayouts = [];
 
       for (let i = 0; i < images.length; i += perRow) {
         const rowImages = images.slice(i, i + perRow);
         if (rowImages.length < perRow) break;
+
         const ratios = rowImages.map((img) => img.naturalWidth / img.naturalHeight);
         const totalRatio = ratios.reduce((sum, r) => sum + r, 0);
         if (!totalRatio) continue;
 
         const rowHeight = (containerWidth - (gap * (perRow - 1))) / totalRatio;
+        if (!Number.isFinite(rowHeight) || rowHeight <= 0) return;
 
-        rowImages.forEach((img, idx) => {
-          const width = ratios[idx] * rowHeight;
-          const figure = figures[i + idx];
-          if (!figure) return;
-          figure.style.width = `${width}px`;
-          figure.style.flexBasis = `${width}px`;
-          img.style.width = '100%';
-          img.style.height = `${rowHeight}px`;
+        const rowFigures = figures.slice(i, i + perRow);
+        const columnWidths = ratios.map((ratio) => ratio * rowHeight);
+
+        if (columnWidths.some((width) => !Number.isFinite(width) || width <= 0)) return;
+
+        rowLayouts.push({
+          figures: rowFigures,
+          images: rowImages,
+          rowHeight,
+          columnWidths
         });
       }
+
+      if (!rowLayouts.length) return;
+
+      const fragment = document.createDocumentFragment();
+
+      rowLayouts.forEach(({ figures: rowFigures, images: rowImages, rowHeight, columnWidths }) => {
+        const row = document.createElement('div');
+        row.className = 'justified-row';
+        row.style.setProperty('--justified-columns', columnWidths.map((width) => `${width}px`).join(' '));
+
+        rowImages.forEach((img, idx) => {
+          img.style.width = '100%';
+          img.style.height = `${rowHeight}px`;
+          const figure = rowFigures[idx];
+          if (!figure) return;
+          row.appendChild(figure);
+        });
+
+        fragment.appendChild(row);
+      });
+
+      gallery.classList.add('is-justified-active');
+      gallery.appendChild(fragment);
     });
 
     window.dispatchEvent(new Event('writing-gallery-layout'));
@@ -423,6 +466,7 @@ if (justifiedGalleries.length) {
   window.addEventListener('resize', scheduleJustified);
   justifiedQuery.addEventListener?.('change', scheduleJustified);
   window.addEventListener('load', layoutJustified);
+  window.addEventListener('pageshow', scheduleJustified);
 
   justifiedGalleries.forEach((gallery) => {
     const images = gallery.querySelectorAll('img');
