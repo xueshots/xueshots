@@ -6,8 +6,8 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
-const MOBILE_MENU_TOP_CLEARANCE = 84;
 const MOBILE_MENU_FOOTER_OFFSET = 16;
+const MOBILE_MENU_SCROLL_TOP = 84;
 
 function ensureMobileMenuStructure() {
   const menuMain = document.querySelector(".menu-main");
@@ -83,25 +83,46 @@ function getElementHeight(element) {
   return element.getBoundingClientRect().height;
 }
 
-function getMobileMenuPanelRequiredHeight(panel, content) {
-  if (!panel || !content) return 0;
+function getVisibleChildren(element) {
+  if (!element) return [];
 
-  const panelStyle = window.getComputedStyle(panel);
-  const contentStyle = window.getComputedStyle(content);
-  const paddingTop = parseFloat(panelStyle.paddingTop) || 0;
-  const paddingBottom = parseFloat(panelStyle.paddingBottom) || 0;
-  const contentPaddingTop = parseFloat(contentStyle.paddingTop) || 0;
-  const contentPaddingBottom = parseFloat(contentStyle.paddingBottom) || 0;
-  const contentHeight = Array.from(content.children)
-    .filter((child) => window.getComputedStyle(child).display !== "none")
+  return Array.from(element.children).filter((child) => {
+    return window.getComputedStyle(child).display !== "none";
+  });
+}
+
+function getContentHeight(content) {
+  if (!content) return 0;
+
+  return getVisibleChildren(content)
     .reduce((total, child) => {
       const childStyle = window.getComputedStyle(child);
       const marginTop = parseFloat(childStyle.marginTop) || 0;
       const marginBottom = parseFloat(childStyle.marginBottom) || 0;
       return total + child.getBoundingClientRect().height + marginTop + marginBottom;
     }, 0);
+}
 
-  return paddingTop + paddingBottom + contentPaddingTop + contentPaddingBottom + contentHeight;
+function getTrailingItemGap(content) {
+  const visibleChildren = getVisibleChildren(content);
+  if (visibleChildren.length < 2) return 0;
+
+  const previousItem = visibleChildren[visibleChildren.length - 2];
+  const lastItem = visibleChildren[visibleChildren.length - 1];
+  const previousRect = previousItem.getBoundingClientRect();
+  const lastRect = lastItem.getBoundingClientRect();
+
+  return Math.max(0, lastRect.top - previousRect.bottom);
+}
+
+function getCenteredMenuPanelRequiredHeight(content, footer, footerBottom) {
+  if (!content || !footer) return 0;
+
+  const contentHeight = getContentHeight(content);
+  const footerHeight = getElementHeight(footer);
+  const trailingGap = getTrailingItemGap(content);
+
+  return contentHeight + (2 * (footerHeight + footerBottom + trailingGap));
 }
 
 function clearMobileMenuFit() {
@@ -109,7 +130,8 @@ function clearMobileMenuFit() {
   menu.style.removeProperty("--mobile-menu-viewport-height");
   menu.style.removeProperty("--mobile-menu-fit-scale");
   menu.style.removeProperty("--mobile-menu-footer-bottom");
-  menu.style.removeProperty("--mobile-menu-edge-space");
+  menu.style.removeProperty("--mobile-menu-scroll-top");
+  menu.classList.remove("menu-scrollable");
 }
 
 function syncMobileMenuFit() {
@@ -121,31 +143,26 @@ function syncMobileMenuFit() {
   }
 
   const viewportHeight = getVisibleViewportHeight();
-  let fitScale = 1;
 
   menu.style.setProperty("--mobile-menu-viewport-height", `${viewportHeight}px`);
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
+  menu.style.setProperty("--mobile-menu-footer-bottom", `${MOBILE_MENU_FOOTER_OFFSET}px`);
+  menu.style.setProperty("--mobile-menu-scroll-top", `${MOBILE_MENU_SCROLL_TOP}px`);
+  menu.classList.remove("menu-scrollable");
 
-  for (let pass = 0; pass < 2; pass += 1) {
-    const footerBottom = Math.max(12, Math.round(MOBILE_MENU_FOOTER_OFFSET * fitScale));
-    const footerHeight = Math.max(getElementHeight(menuMainFooter), getElementHeight(menuWritingFooter));
-    const edgeSpace = Math.max(MOBILE_MENU_TOP_CLEARANCE, footerHeight + footerBottom);
+  const mainRequiredHeight = getCenteredMenuPanelRequiredHeight(
+    menuMainLinks,
+    menuMainFooter,
+    MOBILE_MENU_FOOTER_OFFSET
+  );
+  const writingRequiredHeight = getCenteredMenuPanelRequiredHeight(
+    menuWritingLinks,
+    menuWritingFooter,
+    MOBILE_MENU_FOOTER_OFFSET
+  );
+  const requiredHeight = Math.max(mainRequiredHeight, writingRequiredHeight);
 
-    menu.style.setProperty("--mobile-menu-footer-bottom", `${footerBottom}px`);
-    menu.style.setProperty("--mobile-menu-edge-space", `${edgeSpace}px`);
-
-    const mainRequiredHeight = getMobileMenuPanelRequiredHeight(menuMain, menuMainLinks);
-    const writingRequiredHeight = getMobileMenuPanelRequiredHeight(menuWriting, menuWritingLinks);
-    const requiredHeight = Math.max(mainRequiredHeight, writingRequiredHeight);
-
-    if (!requiredHeight) {
-      break;
-    }
-
-    const nextScale = Math.min(1, (viewportHeight - 2) / requiredHeight);
-    fitScale = Math.max(0.56, Math.min(fitScale, nextScale));
-    menu.style.setProperty("--mobile-menu-fit-scale", fitScale.toFixed(3));
-  }
+  menu.classList.toggle("menu-scrollable", requiredHeight > viewportHeight);
 }
 
 function syncMobileMenuFitIfOpen() {

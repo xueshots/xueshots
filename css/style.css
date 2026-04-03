@@ -238,7 +238,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-fit-scale: 1;
   --mobile-menu-footer-bottom: 16px;
-  --mobile-menu-edge-space: 84px;
+  --mobile-menu-scroll-top: 84px;
   position: fixed;
   inset: 0;
   z-index: 900;
@@ -253,6 +253,11 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu.is-open {
   transform: translateY(0);
   overflow: hidden;
+}
+
+.menu.is-open.menu-scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Two-panel slider */
@@ -277,8 +282,8 @@ body:not(.dark) .logo {   /* adding in logo as well */
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-items: center;
+  align-items: center;
+  justify-content: center;
   padding: 0 calc(10px + (var(--scrollbar-width, 0px) / 2));
   overflow: hidden;
 }
@@ -291,8 +296,8 @@ body:not(.dark) .logo {   /* adding in logo as well */
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-items: center;
+  align-items: center;
+  justify-content: center;
   padding: 0 calc(10px + (var(--scrollbar-width, 0px) / 2));
   overflow: hidden;
 }
@@ -301,15 +306,13 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu-writing-links {
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: center;
-  align-self: stretch;
-  flex: 1;
+  align-self: center;
+  flex: 0 0 auto;
   width: 100%;
   min-width: 0;
   min-height: 0;
-  padding-top: calc(var(--mobile-menu-edge-space) + env(safe-area-inset-top));
-  padding-bottom: calc(var(--mobile-menu-edge-space) + env(safe-area-inset-bottom));
   gap: 0;
 }
 
@@ -384,6 +387,34 @@ body:not(.dark) .logo {   /* adding in logo as well */
   width: calc(100% - 20px);
   margin: 0;
   padding: 0;
+}
+
+.menu.menu-scrollable .menu-panels {
+  min-height: var(--mobile-menu-viewport-height);
+  height: auto;
+  align-items: flex-start;
+}
+
+.menu.menu-scrollable .menu-main,
+.menu.menu-scrollable .menu-writing {
+  min-height: var(--mobile-menu-viewport-height);
+  height: auto;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: calc(var(--mobile-menu-scroll-top) + env(safe-area-inset-top));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+
+.menu.menu-scrollable .menu-main-links,
+.menu.menu-scrollable .menu-writing-links {
+  align-self: stretch;
+}
+
+.menu.menu-scrollable .menu-footer {
+  position: static;
+  transform: none;
+  width: 100%;
+  padding-top: 24px;
 }
 
 .menu-back {
