@@ -12,6 +12,7 @@ const controls = document.getElementById("carouselControls");
 const prevButton = document.getElementById("carouselPrevButton");
 const nextButton = document.getElementById("carouselNextButton");
 const autoplayToggle = document.getElementById("carouselAutoplayToggle");
+const rootStyle = document.documentElement.style;
 
 let slides = Array.from(document.querySelectorAll(".carousel-slide"));
 
@@ -113,9 +114,30 @@ const X_STOP = 0.47;
 const Y_TOP_STOP = 0.02;
 const Y_BOT_STOP = 0.36;
 
+function getVisibleViewportSize() {
+  if (window.visualViewport) {
+    return {
+      width: Math.round(window.visualViewport.width),
+      height: Math.round(window.visualViewport.height),
+    };
+  }
+
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+}
+
+function syncHomeViewportMetrics() {
+  const { height } = getVisibleViewportSize();
+  const controlsGap = Math.max(18, Math.min(44, Math.round(height * 0.04)));
+
+  rootStyle.setProperty("--home-viewport-height", `${height}px`);
+  rootStyle.setProperty("--home-carousel-controls-gap", `${controlsGap}px`);
+}
+
 function updateIntroCrop() {
-  const winW = window.innerWidth;
-  const winH = window.innerHeight;
+  const { width: winW, height: winH } = getVisibleViewportSize();
   let posX, posY;
 
   if (winW / winH >= IMG_RATIO) {
@@ -153,8 +175,16 @@ function updateIntroCrop() {
   introImg.style.objectPosition = `${posX}% ${posY}%`;
 }
 
+syncHomeViewportMetrics();
 updateIntroCrop();
 window.addEventListener('resize', updateIntroCrop);
+window.addEventListener("resize", syncHomeViewportMetrics);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", syncHomeViewportMetrics);
+  window.visualViewport.addEventListener("resize", updateIntroCrop);
+  window.visualViewport.addEventListener("scroll", syncHomeViewportMetrics);
+}
 
 /* ============================
    AUTO SLIDE

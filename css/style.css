@@ -521,7 +521,8 @@ body.page.home.dark {
 
 /* Lock scroll ONLY on homepage */
 body.page.home {
-  height: 100vh;
+  height: var(--home-viewport-height, 100dvh);
+  min-height: var(--home-viewport-height, 100dvh);
   overflow: hidden;
 }
 
@@ -537,12 +538,13 @@ body.page.home .site-header {
 ============================= */
 
 .carousel-wrapper {
-  --carousel-controls-gap: clamp(28px, 5vh, 44px);
+  --carousel-controls-gap: var(--home-carousel-controls-gap, clamp(28px, 5vh, 44px));
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  height: 100vh;
+  height: var(--home-viewport-height, 100dvh);
+  min-height: var(--home-viewport-height, 100dvh);
   box-sizing: border-box;
 
   padding-top: 110px;
