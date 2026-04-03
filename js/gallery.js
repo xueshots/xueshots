@@ -662,6 +662,25 @@ const dualMatchLayouts = Array.from(document.querySelectorAll('.dual-layout.dual
 if (dualMatchLayouts.length) {
   const dualMatchQuery = window.matchMedia('(min-width: 1024px)');
 
+  const getLayoutHeight = (element) => {
+    if (!element) return 0;
+    return element.offsetHeight || element.clientHeight || element.getBoundingClientRect().height || 0;
+  };
+
+  const queueDualMatchPasses = () => {
+    scheduleDualMatch();
+
+    requestAnimationFrame(() => {
+      scheduleDualMatch();
+
+      requestAnimationFrame(() => {
+        scheduleDualMatch();
+      });
+    });
+
+    setTimeout(scheduleDualMatch, 180);
+  };
+
   const resetDualMatch = (layout) => {
     const leftGallery = layout.querySelector('.dual-media.dual-left .writing-gallery');
     if (leftGallery) {
@@ -690,9 +709,9 @@ if (dualMatchLayouts.length) {
       const gap = parseFloat(styles.rowGap || styles.gap || 0);
       const totalGaps = gap * Math.max(0, figures.length - 1);
 
-      const totalImageHeight = figures.reduce((sum, figure) => sum + figure.getBoundingClientRect().height, 0);
+      const totalImageHeight = figures.reduce((sum, figure) => sum + getLayoutHeight(figure), 0);
       const currentHeight = totalImageHeight + totalGaps;
-      const targetHeight = rightImage.getBoundingClientRect().height;
+      const targetHeight = getLayoutHeight(rightImage);
 
       if (!currentHeight || !targetHeight) return;
 
@@ -727,7 +746,8 @@ if (dualMatchLayouts.length) {
 
   window.addEventListener('resize', scheduleDualMatch);
   dualMatchQuery.addEventListener?.('change', scheduleDualMatch);
-  window.addEventListener('load', layoutDualMatch);
+  window.addEventListener('load', queueDualMatchPasses);
+  window.addEventListener('pageshow', queueDualMatchPasses);
 
   dualMatchLayouts.forEach((layout) => {
     const images = layout.querySelectorAll('img');
@@ -736,6 +756,23 @@ if (dualMatchLayouts.length) {
       img.addEventListener('load', scheduleDualMatch);
     });
   });
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(queueDualMatchPasses).catch(() => {});
+  }
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const dualMatchObserver = new ResizeObserver(() => {
+      scheduleDualMatch();
+    });
+
+    dualMatchLayouts.forEach((layout) => {
+      const rightImage = layout.querySelector('.dual-media.dual-right img');
+      if (rightImage) {
+        dualMatchObserver.observe(rightImage);
+      }
+    });
+  }
 
   layoutDualMatch();
 }
