@@ -135,19 +135,43 @@
       </div>
     </div>
 
-    <button
-      class="carousel-autoplay-toggle is-playing"
-      id="carouselAutoplayToggle"
-      type="button"
-      aria-label="Pause autoplay"
-      aria-pressed="false"
-    >
-      <span class="carousel-autoplay-pause" aria-hidden="true">
-        <span></span>
-        <span></span>
-      </span>
-      <span class="carousel-autoplay-play" aria-hidden="true"></span>
-    </button>
+    <div class="carousel-controls" id="carouselControls">
+      <button
+        class="carousel-nav-button"
+        id="carouselPrevButton"
+        type="button"
+        aria-label="Previous image"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="14 5 7 12 14 19"/>
+        </svg>
+      </button>
+
+      <button
+        class="carousel-autoplay-toggle is-playing"
+        id="carouselAutoplayToggle"
+        type="button"
+        aria-label="Pause autoplay"
+        aria-pressed="false"
+      >
+        <span class="carousel-autoplay-pause" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+        <span class="carousel-autoplay-play" aria-hidden="true"></span>
+      </button>
+
+      <button
+        class="carousel-nav-button"
+        id="carouselNextButton"
+        type="button"
+        aria-label="Next image"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="10 5 17 12 10 19"/>
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 

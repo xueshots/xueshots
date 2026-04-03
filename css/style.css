@@ -600,11 +600,27 @@ body.page.home .site-header {
   pointer-events: none;
 }
 
-.carousel-autoplay-toggle {
+.carousel-controls {
   position: absolute;
   left: 50%;
   bottom: clamp(28px, 5vh, 44px);
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.carousel-controls.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel-nav-button,
+.carousel-autoplay-toggle {
   width: 40px;
   height: 40px;
   border: none;
@@ -615,26 +631,26 @@ body.page.home .site-header {
   align-items: center;
   justify-content: center;
   padding: 0;
-  opacity: 0;
-  pointer-events: none;
   cursor: pointer;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  transition: opacity 0.28s ease, color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
-.carousel-autoplay-toggle.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
+.carousel-nav-button:hover,
 .carousel-autoplay-toggle:hover {
   color: rgba(255, 255, 255, 0.68);
 }
 
+.carousel-nav-button:focus-visible,
 .carousel-autoplay-toggle:focus-visible {
   outline: none;
   color: rgba(255, 255, 255, 0.68);
+}
+
+.carousel-nav-button svg {
+  width: 15px;
+  height: 15px;
 }
 
 .carousel-autoplay-pause {

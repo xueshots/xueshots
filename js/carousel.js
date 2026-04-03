@@ -8,6 +8,9 @@ const AUTO_SLIDE_DELAY = 4000;
 ============================ */
 const carousel = document.querySelector(".carousel");
 const track = document.querySelector(".carousel-track");
+const controls = document.getElementById("carouselControls");
+const prevButton = document.getElementById("carouselPrevButton");
+const nextButton = document.getElementById("carouselNextButton");
 const autoplayToggle = document.getElementById("carouselAutoplayToggle");
 
 let slides = Array.from(document.querySelectorAll(".carousel-slide"));
@@ -197,8 +200,14 @@ function syncAutoplayToggle() {
 }
 
 function showAutoplayToggle() {
-  if (!autoplayToggle) return;
-  autoplayToggle.classList.add("is-visible");
+  if (controls) {
+    controls.classList.add("is-visible");
+    return;
+  }
+
+  if (autoplayToggle) {
+    autoplayToggle.classList.add("is-visible");
+  }
 }
 
 function resumeAutoSlideFromManualNavigation() {
@@ -223,6 +232,20 @@ if (autoplayToggle) {
   syncAutoplayToggle();
   autoplayToggle.addEventListener("click", () => {
     toggleAutoSlidePausedState();
+  });
+}
+
+if (prevButton) {
+  prevButton.addEventListener("click", () => {
+    if (isAnimating) return;
+    manualMoveToSlide(currentIndex - 1);
+  });
+}
+
+if (nextButton) {
+  nextButton.addEventListener("click", () => {
+    if (isAnimating) return;
+    manualMoveToSlide(currentIndex + 1);
   });
 }
 
