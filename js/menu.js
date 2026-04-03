@@ -5,7 +5,6 @@ const hamburger = document.querySelector(".hamburger");
 const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
-const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
 
@@ -64,12 +63,6 @@ const menuWritingFooter = menuWriting
 
 let isMenuOpen = false;
 let isMenuAnimating = false;
-let scrollbarWidth = 0;
-
-function getScrollbarWidth() {
-  return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-}
-
 function getVisibleViewportHeight() {
   if (window.visualViewport) {
     return Math.round(window.visualViewport.height);
@@ -269,25 +262,14 @@ function toggleMenu() {
   if (isMenuOpen) {
     syncMobileMenuFit();
 
-    // Measure scrollbar width before hiding it
-    scrollbarWidth = getScrollbarWidth();
-
     // Lock scroll
     document.documentElement.style.overflow = "hidden";
-
-    // Compensate for scrollbar disappearing
-    document.body.style.paddingRight = scrollbarWidth + "px";
-
-    // Keep hamburger in place
-    hamburger.style.right = (HAMBURGER_RIGHT + scrollbarWidth) + "px";
 
     syncMobileMenuFit();
   } else {
     // Restore scroll and layout AFTER animation completes to prevent jump
     setTimeout(() => {
       document.documentElement.style.overflow = "";
-      document.body.style.paddingRight = "";
-      hamburger.style.right = "";
     }, 500);
   }
 
@@ -370,8 +352,6 @@ window.addEventListener("resize", () => {
       menu.classList.remove("writing-open");
       body.classList.remove("menu-open");
       document.documentElement.style.overflow = "";
-      document.body.style.paddingRight = "";
-      hamburger.style.right = "";
     }
   }, 100);
 });
