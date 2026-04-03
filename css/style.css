@@ -653,8 +653,8 @@ body.page.home .site-header {
 }
 
 .carousel-nav-button svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .carousel-autoplay-pause {
@@ -665,8 +665,8 @@ body.page.home .site-header {
 }
 
 .carousel-autoplay-pause span {
-  width: 1.8px;
-  height: 12px;
+  width: 2px;
+  height: 14px;
   border-radius: 999px;
   background: currentColor;
 }
@@ -675,9 +675,9 @@ body.page.home .site-header {
   width: 0;
   height: 0;
   margin-left: 2px;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-left: 10px solid currentColor;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid currentColor;
   display: none;
 }
 
