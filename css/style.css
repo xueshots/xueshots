@@ -236,15 +236,11 @@ body:not(.dark) .logo {   /* adding in logo as well */
 
 .menu {
   --mobile-menu-viewport-height: 100dvh;
-  --mobile-menu-viewport-width: 100vw;
   --mobile-menu-fit-scale: 1;
   --mobile-menu-footer-bottom: 30px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
-  top: 0;
-  left: 50%;
-  width: var(--mobile-menu-viewport-width);
-  margin-left: calc(var(--mobile-menu-viewport-width) / -2);
+  inset: 0;
   z-index: 900;
   background: #FFB800;
   color: #000000;
@@ -2654,10 +2650,6 @@ body.light {
   /* Reset menu to horizontal nav */
   .menu {
     position: relative;
-    top: auto;
-    left: auto;
-    width: auto;
-    margin-left: 0;
     transform: none;
     background: transparent;
     display: flex;

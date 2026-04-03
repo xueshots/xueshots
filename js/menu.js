@@ -5,6 +5,7 @@ const hamburger = document.querySelector(".hamburger");
 const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
+const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
 
@@ -63,20 +64,18 @@ const menuWritingFooter = menuWriting
 
 let isMenuOpen = false;
 let isMenuAnimating = false;
+let scrollbarWidth = 0;
+
+function getScrollbarWidth() {
+  return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+}
+
 function getVisibleViewportHeight() {
   if (window.visualViewport) {
     return Math.round(window.visualViewport.height);
   }
 
   return window.innerHeight;
-}
-
-function getVisibleViewportWidth() {
-  if (window.visualViewport) {
-    return Math.round(window.visualViewport.width);
-  }
-
-  return window.innerWidth;
 }
 
 function getElementHeight(element) {
@@ -129,7 +128,6 @@ function getCenteredMenuPanelRequiredHeight(content, footer, footerBottom) {
 function clearMobileMenuFit() {
   if (!menu) return;
   menu.style.removeProperty("--mobile-menu-viewport-height");
-  menu.style.removeProperty("--mobile-menu-viewport-width");
   menu.style.removeProperty("--mobile-menu-fit-scale");
   menu.style.removeProperty("--mobile-menu-footer-bottom");
   menu.style.removeProperty("--mobile-menu-scroll-top");
@@ -145,10 +143,8 @@ function syncMobileMenuFit() {
   }
 
   const viewportHeight = getVisibleViewportHeight();
-  const viewportWidth = getVisibleViewportWidth();
 
   menu.style.setProperty("--mobile-menu-viewport-height", `${viewportHeight}px`);
-  menu.style.setProperty("--mobile-menu-viewport-width", `${viewportWidth}px`);
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
   menu.style.setProperty("--mobile-menu-footer-bottom", `${MOBILE_MENU_FOOTER_OFFSET}px`);
   menu.style.setProperty("--mobile-menu-scroll-top", `${MOBILE_MENU_SCROLL_TOP}px`);
@@ -262,14 +258,25 @@ function toggleMenu() {
   if (isMenuOpen) {
     syncMobileMenuFit();
 
+    // Measure scrollbar width before hiding it
+    scrollbarWidth = getScrollbarWidth();
+
     // Lock scroll
     document.documentElement.style.overflow = "hidden";
+
+    // Compensate for scrollbar disappearing
+    document.body.style.paddingRight = scrollbarWidth + "px";
+
+    // Keep hamburger in place
+    hamburger.style.right = (HAMBURGER_RIGHT + scrollbarWidth) + "px";
 
     syncMobileMenuFit();
   } else {
     // Restore scroll and layout AFTER animation completes to prevent jump
     setTimeout(() => {
       document.documentElement.style.overflow = "";
+      document.body.style.paddingRight = "";
+      hamburger.style.right = "";
     }, 500);
   }
 
@@ -352,6 +359,8 @@ window.addEventListener("resize", () => {
       menu.classList.remove("writing-open");
       body.classList.remove("menu-open");
       document.documentElement.style.overflow = "";
+      document.body.style.paddingRight = "";
+      hamburger.style.right = "";
     }
   }, 100);
 });
