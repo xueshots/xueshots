@@ -6,8 +6,8 @@ const SNAP_THRESHOLD = 0.2;
 const FLICK_VELOCITY_THRESHOLD = 0.35;
 const DRAG_VELOCITY_WINDOW = 120;
 const DRAG_MOMENTUM_PROJECTION = 240;
-const SNAP_MIN_DURATION = 220;
-const SNAP_MAX_DURATION = 440;
+const SNAP_MIN_DURATION = 280;
+const SNAP_MAX_DURATION = 460;
 const SNAP_EASING = "cubic-bezier(0.22, 0.9, 0.32, 1)";
 
 /* ============================
@@ -374,12 +374,14 @@ function snapToSlide(releaseVelocity = 0) {
   const remainingDistance = Math.abs(targetTranslate - currentTranslate);
   const distanceRatio = Math.min(remainingDistance / slideWidth, 1);
   const velocityRatio = Math.min(Math.abs(releaseVelocity) / 1.2, 1);
+  const settleBoost = (1 - distanceRatio) * 140;
+  const travelBoost = distanceRatio * 40;
   const duration = Math.round(
     Math.max(
       SNAP_MIN_DURATION,
       Math.min(
         SNAP_MAX_DURATION,
-        320 + (distanceRatio * 120) - (velocityRatio * 140)
+        280 + settleBoost + travelBoost - (velocityRatio * 90)
       )
     )
   );
