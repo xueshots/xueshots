@@ -3,6 +3,12 @@
 ============================ */
 const AUTO_SLIDE_DELAY = 4000;
 const SNAP_THRESHOLD = 0.2;
+const FLICK_VELOCITY_THRESHOLD = 0.35;
+const DRAG_VELOCITY_WINDOW = 120;
+const DRAG_MOMENTUM_PROJECTION = 240;
+const SNAP_MIN_DURATION = 220;
+const SNAP_MAX_DURATION = 440;
+const SNAP_EASING = "cubic-bezier(0.22, 0.9, 0.32, 1)";
 
 /* ============================
    ELEMENTS
@@ -25,6 +31,8 @@ let currentIndex = 1;
 let currentTranslate = 0;
 let prevTranslate = 0;
 let startX = 0;
+let dragVelocity = 0;
+let dragSamples = [];
 
 let isDragging = false;
 let isAnimating = false;
@@ -254,6 +262,9 @@ function onPointerDown(e) {
   isDragging = true;
   startX = e.clientX;
   prevTranslate = currentTranslate;
+  dragVelocity = 0;
+  dragSamples = [];
+  recordDragSample(e.clientX);
 
   stopAutoSlide();
   carousel.setPointerCapture(e.pointerId);
@@ -264,6 +275,7 @@ function onPointerMove(e) {
 
   const delta = e.clientX - startX;
   currentTranslate = prevTranslate + delta;
+  recordDragSample(e.clientX);
   setTranslate(currentTranslate, false);
 }
 
@@ -272,15 +284,17 @@ function onPointerUp(e) {
 
   isDragging = false;
   carousel.releasePointerCapture(e.pointerId);
+  recordDragSample(e.clientX);
 
   const movedBy = currentTranslate - prevTranslate;
   const threshold = slideWidth * SNAP_THRESHOLD;
+  const projectedDelta = movedBy + (dragVelocity * DRAG_MOMENTUM_PROJECTION);
 
-  if (movedBy < -threshold) currentIndex += 1;
-  else if (movedBy > threshold) currentIndex -= 1;
+  if (projectedDelta < -threshold || dragVelocity < -FLICK_VELOCITY_THRESHOLD) currentIndex += 1;
+  else if (projectedDelta > threshold || dragVelocity > FLICK_VELOCITY_THRESHOLD) currentIndex -= 1;
 
   resumeAutoSlideFromManualNavigation();
-  snapToSlide();
+  snapToSlide(dragVelocity);
   startAutoSlide();
 }
 
@@ -336,25 +350,70 @@ window.addEventListener("keydown", (e) => {
 /* ============================
    TRANSLATION
 ============================ */
-function setTranslate(value, animate = true) {
+function setTranslate(value, animate = true, options = {}) {
   if (animate) {
     isAnimating = true;
-    track.style.transition = "transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)";
+    const duration = options.duration ?? 700;
+    const easing = options.easing ?? "cubic-bezier(0.4, 0, 0.2, 1)";
+    track.style.transition = `transform ${duration}ms ${easing}`;
   } else {
     track.style.transition = "none";
   }
 
-  track.style.transform = `translateX(${value}px)`;
+  track.style.transform = `translate3d(${value}px, 0, 0)`;
 }
 
-function moveToSlide(index) {
+function moveToSlide(index, options = {}) {
   currentIndex = index;
   currentTranslate = -currentIndex * slideWidth;
-  setTranslate(currentTranslate, true);
+  setTranslate(currentTranslate, true, options);
 }
 
-function snapToSlide() {
-  moveToSlide(currentIndex);
+function snapToSlide(releaseVelocity = 0) {
+  const targetTranslate = -currentIndex * slideWidth;
+  const remainingDistance = Math.abs(targetTranslate - currentTranslate);
+  const distanceRatio = Math.min(remainingDistance / slideWidth, 1);
+  const velocityRatio = Math.min(Math.abs(releaseVelocity) / 1.2, 1);
+  const duration = Math.round(
+    Math.max(
+      SNAP_MIN_DURATION,
+      Math.min(
+        SNAP_MAX_DURATION,
+        320 + (distanceRatio * 120) - (velocityRatio * 140)
+      )
+    )
+  );
+
+  moveToSlide(currentIndex, {
+    duration,
+    easing: SNAP_EASING
+  });
+}
+
+function recordDragSample(x) {
+  const now = performance.now();
+  dragSamples.push({ x, time: now });
+
+  const cutoff = now - DRAG_VELOCITY_WINDOW;
+  while (dragSamples.length > 2 && dragSamples[0].time < cutoff) {
+    dragSamples.shift();
+  }
+
+  if (dragSamples.length < 2) {
+    dragVelocity = 0;
+    return;
+  }
+
+  const first = dragSamples[0];
+  const last = dragSamples[dragSamples.length - 1];
+  const elapsed = last.time - first.time;
+
+  if (elapsed <= 0) {
+    dragVelocity = 0;
+    return;
+  }
+
+  dragVelocity = (last.x - first.x) / elapsed;
 }
 
 /* ============================
