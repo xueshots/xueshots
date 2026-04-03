@@ -8,7 +8,7 @@ const FLICK_VELOCITY_THRESHOLD = 0.55;
 const DRAG_VELOCITY_WINDOW = 120;
 const SNAP_MIN_DURATION = 1000;
 const SNAP_MAX_DURATION = 1200;
-const SNAP_EASING = "cubic-bezier(0.16, 0.84, 0.32, 1)";
+const SNAP_EASING = "linear";
 
 /* ============================
    ELEMENTS
