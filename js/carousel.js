@@ -2,13 +2,13 @@
    CONFIG
 ============================ */
 const AUTO_SLIDE_DELAY = 4000;
-const SNAP_THRESHOLD = 0.2;
-const FLICK_VELOCITY_THRESHOLD = 0.35;
+const SLOW_SWIPE_ADVANCE_RATIO = 0.5;
+const FAST_SWIPE_DISTANCE_RATIO = 0.08;
+const FLICK_VELOCITY_THRESHOLD = 0.55;
 const DRAG_VELOCITY_WINDOW = 120;
-const DRAG_MOMENTUM_PROJECTION = 240;
-const SNAP_MIN_DURATION = 280;
-const SNAP_MAX_DURATION = 460;
-const SNAP_EASING = "cubic-bezier(0.22, 0.9, 0.32, 1)";
+const SNAP_MIN_DURATION = 360;
+const SNAP_MAX_DURATION = 560;
+const SNAP_EASING = "cubic-bezier(0.16, 0.84, 0.32, 1)";
 
 /* ============================
    ELEMENTS
@@ -287,11 +287,18 @@ function onPointerUp(e) {
   recordDragSample(e.clientX);
 
   const movedBy = currentTranslate - prevTranslate;
-  const threshold = slideWidth * SNAP_THRESHOLD;
-  const projectedDelta = movedBy + (dragVelocity * DRAG_MOMENTUM_PROJECTION);
+  const absoluteDistance = Math.abs(movedBy);
+  const slowSwipeThreshold = slideWidth * SLOW_SWIPE_ADVANCE_RATIO;
+  const fastSwipeDistanceFloor = slideWidth * FAST_SWIPE_DISTANCE_RATIO;
+  const isFastSwipe = absoluteDistance >= fastSwipeDistanceFloor && Math.abs(dragVelocity) >= FLICK_VELOCITY_THRESHOLD;
 
-  if (projectedDelta < -threshold || dragVelocity < -FLICK_VELOCITY_THRESHOLD) currentIndex += 1;
-  else if (projectedDelta > threshold || dragVelocity > FLICK_VELOCITY_THRESHOLD) currentIndex -= 1;
+  if (isFastSwipe) {
+    if (dragVelocity < 0) currentIndex += 1;
+    else if (dragVelocity > 0) currentIndex -= 1;
+  } else if (absoluteDistance >= slowSwipeThreshold) {
+    if (movedBy < 0) currentIndex += 1;
+    else if (movedBy > 0) currentIndex -= 1;
+  }
 
   resumeAutoSlideFromManualNavigation();
   snapToSlide(dragVelocity);
@@ -374,14 +381,14 @@ function snapToSlide(releaseVelocity = 0) {
   const remainingDistance = Math.abs(targetTranslate - currentTranslate);
   const distanceRatio = Math.min(remainingDistance / slideWidth, 1);
   const velocityRatio = Math.min(Math.abs(releaseVelocity) / 1.2, 1);
-  const settleBoost = (1 - distanceRatio) * 140;
-  const travelBoost = distanceRatio * 40;
+  const settleBoost = (1 - distanceRatio) * 120;
+  const travelBoost = distanceRatio * 60;
   const duration = Math.round(
     Math.max(
       SNAP_MIN_DURATION,
       Math.min(
         SNAP_MAX_DURATION,
-        280 + settleBoost + travelBoost - (velocityRatio * 90)
+        420 + settleBoost + travelBoost - (velocityRatio * 60)
       )
     )
   );
