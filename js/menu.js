@@ -6,7 +6,8 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
-const MOBILE_MENU_TOP_CLEARANCE = 72;
+const MOBILE_MENU_TOP_CLEARANCE = 84;
+const MOBILE_MENU_FOOTER_OFFSET = 16;
 
 function ensureMobileMenuStructure() {
   const menuMain = document.querySelector(".menu-main");
@@ -126,7 +127,7 @@ function syncMobileMenuFit() {
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
 
   for (let pass = 0; pass < 2; pass += 1) {
-    const footerBottom = Math.max(8, Math.round(10 * fitScale));
+    const footerBottom = Math.max(12, Math.round(MOBILE_MENU_FOOTER_OFFSET * fitScale));
     const footerHeight = Math.max(getElementHeight(menuMainFooter), getElementHeight(menuWritingFooter));
     const edgeSpace = Math.max(MOBILE_MENU_TOP_CLEARANCE, footerHeight + footerBottom);
 
