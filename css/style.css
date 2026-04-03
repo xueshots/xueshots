@@ -237,7 +237,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu {
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-fit-scale: 1;
-  --mobile-menu-footer-bottom: 25px;
+  --mobile-menu-footer-bottom: 45px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
   inset: 0;
