@@ -61,13 +61,47 @@ const menuMainFooter = menuMain
 const menuWritingFooter = menuWriting
   ? Array.from(menuWriting.children).find((child) => child.classList.contains("menu-footer"))
   : null;
+const root = document.documentElement;
 
 let isMenuOpen = false;
 let isMenuAnimating = false;
 let scrollbarWidth = 0;
+let useStableScrollbarGutter = false;
 
 function getScrollbarWidth() {
   return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+}
+
+function supportsStableScrollbarGutter() {
+  return typeof CSS !== "undefined" && CSS.supports("scrollbar-gutter: stable");
+}
+
+function lockPageScrollForMenu() {
+  scrollbarWidth = getScrollbarWidth();
+  useStableScrollbarGutter = supportsStableScrollbarGutter() && scrollbarWidth > 0;
+
+  if (useStableScrollbarGutter) {
+    root.style.scrollbarGutter = "stable";
+    root.style.overflow = "hidden";
+    document.body.style.paddingRight = "";
+    hamburger.style.right = "";
+    menu.style.removeProperty("--scrollbar-width");
+    return;
+  }
+
+  root.style.overflow = "hidden";
+  document.body.style.paddingRight = `${scrollbarWidth}px`;
+  hamburger.style.right = `${HAMBURGER_RIGHT + scrollbarWidth}px`;
+  menu.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);
+}
+
+function unlockPageScrollForMenu() {
+  root.style.overflow = "";
+  root.style.scrollbarGutter = "";
+  document.body.style.paddingRight = "";
+  hamburger.style.right = "";
+  menu.style.removeProperty("--scrollbar-width");
+  useStableScrollbarGutter = false;
 }
 
 function getVisibleViewportHeight() {
@@ -257,30 +291,13 @@ function toggleMenu() {
 
   if (isMenuOpen) {
     syncMobileMenuFit();
-
-    // Measure scrollbar width before hiding it
-    scrollbarWidth = getScrollbarWidth();
-
-    // Lock scroll
-    document.documentElement.style.overflow = "hidden";
-
-    // Compensate for scrollbar disappearing
-    document.body.style.paddingRight = scrollbarWidth + "px";
-
-    // Keep hamburger in place
-    hamburger.style.right = (HAMBURGER_RIGHT + scrollbarWidth) + "px";
-
-    // Keep menu panels centered
-    menu.style.setProperty("--scrollbar-width", scrollbarWidth + "px");
+    lockPageScrollForMenu();
 
     syncMobileMenuFit();
   } else {
     // Restore scroll and layout AFTER animation completes to prevent jump
     setTimeout(() => {
-      document.documentElement.style.overflow = "";
-      document.body.style.paddingRight = "";
-      hamburger.style.right = "";
-      menu.style.removeProperty("--scrollbar-width");
+      unlockPageScrollForMenu();
     }, 500);
   }
 
@@ -362,10 +379,7 @@ window.addEventListener("resize", () => {
       menu.classList.remove("is-open");
       menu.classList.remove("writing-open");
       body.classList.remove("menu-open");
-      document.documentElement.style.overflow = "";
-      document.body.style.paddingRight = "";
-      hamburger.style.right = "";
-      menu.style.removeProperty("--scrollbar-width");
+      unlockPageScrollForMenu();
     }
   }, 100);
 });
