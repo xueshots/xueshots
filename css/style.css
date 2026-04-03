@@ -237,7 +237,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu {
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-fit-scale: 1;
-  --mobile-menu-footer-bottom: 30px;
+  --mobile-menu-footer-bottom: 16px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
   inset: 0;
@@ -284,7 +284,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  padding: 0 calc(10px + (var(--scrollbar-width, 0px) / 2));
   overflow: hidden;
 }
 
@@ -298,7 +298,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  padding: 0 calc(10px + (var(--scrollbar-width, 0px) / 2));
   overflow: hidden;
 }
 

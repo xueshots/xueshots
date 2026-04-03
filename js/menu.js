@@ -6,7 +6,7 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
-const MOBILE_MENU_FOOTER_OFFSET = 30;
+const MOBILE_MENU_FOOTER_OFFSET = 16;
 const MOBILE_MENU_SCROLL_TOP = 84;
 
 function ensureMobileMenuStructure() {
@@ -270,6 +270,9 @@ function toggleMenu() {
     // Keep hamburger in place
     hamburger.style.right = (HAMBURGER_RIGHT + scrollbarWidth) + "px";
 
+    // Keep menu panels centered
+    menu.style.setProperty("--scrollbar-width", scrollbarWidth + "px");
+
     syncMobileMenuFit();
   } else {
     // Restore scroll and layout AFTER animation completes to prevent jump
@@ -277,6 +280,7 @@ function toggleMenu() {
       document.documentElement.style.overflow = "";
       document.body.style.paddingRight = "";
       hamburger.style.right = "";
+      menu.style.removeProperty("--scrollbar-width");
     }, 500);
   }
 
@@ -361,6 +365,7 @@ window.addEventListener("resize", () => {
       document.documentElement.style.overflow = "";
       document.body.style.paddingRight = "";
       hamburger.style.right = "";
+      menu.style.removeProperty("--scrollbar-width");
     }
   }, 100);
 });
