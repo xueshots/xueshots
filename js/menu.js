@@ -61,49 +61,26 @@ const menuMainFooter = menuMain
 const menuWritingFooter = menuWriting
   ? Array.from(menuWriting.children).find((child) => child.classList.contains("menu-footer"))
   : null;
-const root = document.documentElement;
 
 let isMenuOpen = false;
 let isMenuAnimating = false;
 let scrollbarWidth = 0;
-let useStableScrollbarGutter = false;
 
 function getScrollbarWidth() {
   return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
 }
 
-function supportsStableScrollbarGutter() {
-  return typeof CSS !== "undefined" && CSS.supports("scrollbar-gutter: stable");
-}
-
 function lockPageScrollForMenu() {
   scrollbarWidth = getScrollbarWidth();
-  useStableScrollbarGutter = supportsStableScrollbarGutter() && scrollbarWidth > 0;
-  root.classList.add("menu-open-root");
-
-  if (useStableScrollbarGutter) {
-    root.style.scrollbarGutter = "stable";
-    root.style.overflow = "hidden";
-    document.body.style.paddingRight = "";
-    hamburger.style.right = "";
-    menu.style.removeProperty("--scrollbar-width");
-    return;
-  }
-
-  root.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
   document.body.style.paddingRight = `${scrollbarWidth}px`;
   hamburger.style.right = `${HAMBURGER_RIGHT + scrollbarWidth}px`;
-  menu.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);
 }
 
 function unlockPageScrollForMenu() {
-  root.style.overflow = "";
-  root.style.scrollbarGutter = "";
-  root.classList.remove("menu-open-root");
+  document.documentElement.style.overflow = "";
   document.body.style.paddingRight = "";
   hamburger.style.right = "";
-  menu.style.removeProperty("--scrollbar-width");
-  useStableScrollbarGutter = false;
 }
 
 function getVisibleViewportHeight() {
