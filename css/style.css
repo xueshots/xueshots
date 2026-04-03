@@ -238,7 +238,6 @@ body:not(.dark) .logo {   /* adding in logo as well */
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-viewport-width: 100vw;
   --mobile-menu-fit-scale: 1;
-  --mobile-menu-writing-scale: 0.76;
   --mobile-menu-footer-bottom: 30px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
@@ -352,11 +351,6 @@ body:not(.dark) .logo {   /* adding in logo as well */
   transition: opacity 0.2s ease, transform 0.2s ease;
   display: inline-block;
   max-width: min(92vw, 100%);
-}
-
-.menu-writing a {
-  font-size: calc(3.8rem * var(--mobile-menu-fit-scale) * var(--mobile-menu-writing-scale));
-  white-space: nowrap;
 }
 
 .menu-main a:hover,
@@ -2269,6 +2263,7 @@ body.light {
 
 /* Writing mobile menu font change */
 .menu-writing a {
+  font-size: calc(3rem * var(--mobile-menu-fit-scale));
   font-weight: 400;
 }
 
