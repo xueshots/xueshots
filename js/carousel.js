@@ -6,8 +6,8 @@ const SLOW_SWIPE_ADVANCE_RATIO = 0.5;
 const FAST_SWIPE_DISTANCE_RATIO = 0.08;
 const FLICK_VELOCITY_THRESHOLD = 0.55;
 const DRAG_VELOCITY_WINDOW = 120;
-const SNAP_MIN_DURATION = 360;
-const SNAP_MAX_DURATION = 560;
+const SNAP_MIN_DURATION = 1000;
+const SNAP_MAX_DURATION = 1200;
 const SNAP_EASING = "cubic-bezier(0.16, 0.84, 0.32, 1)";
 
 /* ============================
