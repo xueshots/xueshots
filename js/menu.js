@@ -6,7 +6,7 @@ const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
-const MOBILE_MENU_FOOTER_OFFSET = 16;
+const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
 
 function ensureMobileMenuStructure() {

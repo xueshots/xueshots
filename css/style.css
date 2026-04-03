@@ -139,6 +139,23 @@ body.yellow {
   scrollbar-color: #cc9900 #FFB800;
 }
 
+body.menu-open {
+  background: #FFB800;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scrollbar-color: #FFB800 #FFB800;
+}
+
+body.menu-open::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+body.menu-open::-webkit-scrollbar-track,
+body.menu-open::-webkit-scrollbar-thumb {
+  background: #FFB800;
+}
+
 body.dark::-webkit-scrollbar-track { background: #000000; }
 body.light::-webkit-scrollbar-track { background: #ffffff; }
 body.yellow::-webkit-scrollbar-track { background: #FFB800; }
@@ -237,7 +254,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu {
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-fit-scale: 1;
-  --mobile-menu-footer-bottom: 16px;
+  --mobile-menu-footer-bottom: 30px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
   inset: 0;
