@@ -352,8 +352,6 @@ const justifiedGalleries = Array.from(document.querySelectorAll('.writing-galler
 
 if (justifiedGalleries.length) {
   const justifiedQuery = window.matchMedia('(min-width: 768px)');
-  // Firefox gets the stable grid fallback here because its justified flex pass is the layout path failing in production.
-  const prefersGridFallback = /\bfirefox\/\d+/i.test(window.navigator.userAgent);
 
   const resetJustified = (gallery) => {
     gallery.classList.remove('is-justified-active');
@@ -376,7 +374,6 @@ if (justifiedGalleries.length) {
       resetJustified(gallery);
 
       const supportsMobileJustified = gallery.classList.contains('way-of-water-gallery');
-      if (prefersGridFallback) return;
       if (!justifiedQuery.matches && !supportsMobileJustified) return;
       const perRow = gallery.classList.contains('gallery-3x1')
         ? (window.innerWidth < 768 && supportsMobileJustified ? 2 : 3)
