@@ -249,6 +249,12 @@ function initUnderline() {
     el.style.width = linkRect.width + "px";
   }
 
+  function syncUnderline(link = lastHovered || activeLink) {
+    if (!link) return;
+    pos(getVisible(), link, false);
+    getVisible().style.opacity = "1";
+  }
+
   function slide(link) {
     pos(getVisible(), link, true);
     getVisible().style.opacity = "1";
@@ -284,6 +290,27 @@ function initUnderline() {
       u1.style.transition = "left 0.2s ease, width 0.2s ease, opacity 0.2s ease";
       u1.style.opacity = "1";
     });
+  }
+
+  let underlineSyncFrame = 0;
+  const scheduleUnderlineSync = () => {
+    if (underlineSyncFrame) cancelAnimationFrame(underlineSyncFrame);
+    underlineSyncFrame = requestAnimationFrame(() => {
+      underlineSyncFrame = requestAnimationFrame(() => {
+        underlineSyncFrame = 0;
+        syncUnderline();
+      });
+    });
+  };
+
+  scheduleUnderlineSync();
+  window.addEventListener("load", scheduleUnderlineSync, { once: true });
+  window.addEventListener("pageshow", scheduleUnderlineSync);
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(() => {
+      scheduleUnderlineSync();
+    }).catch(() => {});
   }
 
   links.forEach(link => {

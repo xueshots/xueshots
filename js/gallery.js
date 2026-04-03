@@ -353,11 +353,47 @@ const justifiedGalleries = Array.from(document.querySelectorAll('.writing-galler
 if (justifiedGalleries.length) {
   const justifiedQuery = window.matchMedia('(min-width: 768px)');
 
+  const getNumericStyleValue = (...values) => {
+    for (const value of values) {
+      const parsed = typeof value === 'number' ? value : parseFloat(value || '');
+      if (Number.isFinite(parsed)) return parsed;
+    }
+
+    return 0;
+  };
+
+  const getImageRatio = (img) => {
+    if (!img) return null;
+
+    if (img.naturalWidth && img.naturalHeight) {
+      return img.naturalWidth / img.naturalHeight;
+    }
+
+    const attrWidth = parseFloat(img.getAttribute('width') || '');
+    const attrHeight = parseFloat(img.getAttribute('height') || '');
+    if (attrWidth && attrHeight) {
+      return attrWidth / attrHeight;
+    }
+
+    const figure = img.closest('.writing-figure');
+    const aspectValue = figure?.style.getPropertyValue('--image-aspect-ratio')?.trim();
+    if (aspectValue) {
+      const parts = aspectValue.split('/').map((part) => parseFloat(part.trim()));
+      if (parts.length === 2 && parts[0] && parts[1]) {
+        return parts[0] / parts[1];
+      }
+    }
+
+    return null;
+  };
+
   const resetJustified = (gallery) => {
     const figures = gallery.querySelectorAll('.writing-figure');
     figures.forEach((figure) => {
+      figure.style.flex = '';
       figure.style.width = '';
       figure.style.flexBasis = '';
+      figure.style.maxWidth = '';
     });
 
     const images = gallery.querySelectorAll('img');
@@ -380,31 +416,44 @@ if (justifiedGalleries.length) {
 
       const figures = Array.from(gallery.querySelectorAll('.writing-figure'));
       const images = figures.map((figure) => figure.querySelector('img')).filter(Boolean);
+      const ratiosByImage = images.map(getImageRatio);
 
       if (images.length < 2) return;
-      if (images.some((img) => !img.naturalWidth || !img.naturalHeight)) return;
+      if (ratiosByImage.some((ratio) => !ratio)) return;
 
       const styles = getComputedStyle(gallery);
-      const gap = parseFloat(styles.columnGap || styles.gap || 0);
-      const paddingLeft = parseFloat(styles.paddingLeft || 0);
-      const paddingRight = parseFloat(styles.paddingRight || 0);
-      const containerWidth = gallery.clientWidth - paddingLeft - paddingRight;
+      const gap = getNumericStyleValue(styles.columnGap, styles.gap, 0);
+      const paddingLeft = getNumericStyleValue(styles.paddingLeft, 0);
+      const paddingRight = getNumericStyleValue(styles.paddingRight, 0);
+      const outerWidth = getNumericStyleValue(gallery.getBoundingClientRect().width, gallery.clientWidth, 0);
+      const containerWidth = outerWidth - paddingLeft - paddingRight;
+      if (!Number.isFinite(containerWidth) || containerWidth <= 0) return;
 
       for (let i = 0; i < images.length; i += perRow) {
         const rowImages = images.slice(i, i + perRow);
         if (rowImages.length < perRow) break;
-        const ratios = rowImages.map((img) => img.naturalWidth / img.naturalHeight);
+        const ratios = ratiosByImage.slice(i, i + perRow);
         const totalRatio = ratios.reduce((sum, r) => sum + r, 0);
         if (!totalRatio) continue;
 
-        const rowHeight = (containerWidth - (gap * (perRow - 1))) / totalRatio;
+        const availableWidth = containerWidth - (gap * (perRow - 1));
+        const usableWidth = Math.max(0, availableWidth - 0.5);
+        const rowHeight = usableWidth / totalRatio;
+        if (!Number.isFinite(rowHeight) || rowHeight <= 0) continue;
 
+        let assignedWidth = 0;
         rowImages.forEach((img, idx) => {
-          const width = ratios[idx] * rowHeight;
+          const isLastInRow = idx === rowImages.length - 1;
+          const width = isLastInRow
+            ? Math.max(0, usableWidth - assignedWidth)
+            : ratios[idx] * rowHeight;
           const figure = figures[i + idx];
-          if (!figure) return;
+          if (!figure || !Number.isFinite(width) || width <= 0) return;
+          assignedWidth += width;
+          figure.style.flex = `0 0 ${width}px`;
           figure.style.width = `${width}px`;
           figure.style.flexBasis = `${width}px`;
+          figure.style.maxWidth = `${width}px`;
           img.style.width = '100%';
           img.style.height = `${rowHeight}px`;
         });
@@ -415,26 +464,56 @@ if (justifiedGalleries.length) {
   };
 
   let justifyTimeout;
-  const scheduleJustified = () => {
+  let justifyFrame = 0;
+
+  const scheduleJustifiedSettled = () => {
     clearTimeout(justifyTimeout);
-    justifyTimeout = setTimeout(layoutJustified, 60);
+    if (justifyFrame) {
+      cancelAnimationFrame(justifyFrame);
+      justifyFrame = 0;
+    }
+    justifyTimeout = setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(layoutJustified);
+      });
+    }, 60);
   };
 
-  window.addEventListener('resize', scheduleJustified);
-  justifiedQuery.addEventListener?.('change', scheduleJustified);
-  window.addEventListener('load', layoutJustified);
+  const scheduleJustifiedLive = () => {
+    clearTimeout(justifyTimeout);
+    if (justifyFrame) return;
+    justifyFrame = requestAnimationFrame(() => {
+      justifyFrame = 0;
+      layoutJustified();
+    });
+  };
+
+  window.addEventListener('resize', scheduleJustifiedLive);
+  justifiedQuery.addEventListener?.('change', scheduleJustifiedLive);
+  window.addEventListener('load', scheduleJustifiedSettled);
+  window.addEventListener('pageshow', scheduleJustifiedSettled);
 
   justifiedGalleries.forEach((gallery) => {
     const images = gallery.querySelectorAll('img');
     images.forEach((img) => {
       if (img.complete) return;
-      img.addEventListener('load', scheduleJustified);
+      img.addEventListener('load', scheduleJustifiedSettled);
     });
   });
 
   if (typeof ResizeObserver !== 'undefined') {
-    const justifiedObserver = new ResizeObserver(() => {
-      scheduleJustified();
+    const justifiedObservedWidths = new WeakMap();
+    const justifiedObserver = new ResizeObserver((entries) => {
+      const widthChanged = entries.some((entry) => {
+        const nextWidth = getNumericStyleValue(entry.contentRect?.width, entry.target.getBoundingClientRect().width, 0);
+        const prevWidth = justifiedObservedWidths.get(entry.target);
+        justifiedObservedWidths.set(entry.target, nextWidth);
+        return prevWidth === undefined || Math.abs(nextWidth - prevWidth) > 0.5;
+      });
+
+      if (widthChanged) {
+        scheduleJustifiedLive();
+      }
     });
 
     justifiedGalleries.forEach((gallery) => {
@@ -442,7 +521,21 @@ if (justifiedGalleries.length) {
     });
   }
 
-  layoutJustified();
+  if (typeof IntersectionObserver !== 'undefined') {
+    const justifiedIntersectionObserver = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        scheduleJustifiedSettled();
+      }
+    }, {
+      rootMargin: '240px 0px'
+    });
+
+    justifiedGalleries.forEach((gallery) => {
+      justifiedIntersectionObserver.observe(gallery);
+    });
+  }
+
+  scheduleJustifiedSettled();
 }
 
 /* ============================
