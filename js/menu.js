@@ -75,12 +75,14 @@ function lockPageScrollForMenu() {
   document.documentElement.style.overflow = "hidden";
   document.body.style.paddingRight = `${scrollbarWidth}px`;
   hamburger.style.right = `${HAMBURGER_RIGHT + scrollbarWidth}px`;
+  menu.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);
 }
 
 function unlockPageScrollForMenu() {
   document.documentElement.style.overflow = "";
   document.body.style.paddingRight = "";
   hamburger.style.right = "";
+  menu.style.removeProperty("--scrollbar-width");
 }
 
 function getVisibleViewportHeight() {
