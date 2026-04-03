@@ -352,12 +352,8 @@ const justifiedGalleries = Array.from(document.querySelectorAll('.writing-galler
 
 if (justifiedGalleries.length) {
   const justifiedQuery = window.matchMedia('(min-width: 768px)');
-  // Firefox gets the stable grid fallback here because its justified flex pass is the layout path failing in production.
-  const prefersGridFallback = /\bfirefox\/\d+/i.test(window.navigator.userAgent);
 
   const resetJustified = (gallery) => {
-    gallery.classList.remove('is-justified-active');
-
     const figures = gallery.querySelectorAll('.writing-figure');
     figures.forEach((figure) => {
       figure.style.width = '';
@@ -376,7 +372,6 @@ if (justifiedGalleries.length) {
       resetJustified(gallery);
 
       const supportsMobileJustified = gallery.classList.contains('way-of-water-gallery');
-      if (prefersGridFallback) return;
       if (!justifiedQuery.matches && !supportsMobileJustified) return;
       const perRow = gallery.classList.contains('gallery-3x1')
         ? (window.innerWidth < 768 && supportsMobileJustified ? 2 : 3)
@@ -387,21 +382,13 @@ if (justifiedGalleries.length) {
       const images = figures.map((figure) => figure.querySelector('img')).filter(Boolean);
 
       if (images.length < 2) return;
-      if (images.length % perRow !== 0) return;
       if (images.some((img) => !img.naturalWidth || !img.naturalHeight)) return;
 
       const styles = getComputedStyle(gallery);
-      const columnGap = Number.parseFloat(styles.columnGap);
-      const genericGap = Number.parseFloat(styles.gap);
-      const gap = Number.isFinite(columnGap)
-        ? columnGap
-        : (Number.isFinite(genericGap) ? genericGap : 0);
+      const gap = parseFloat(styles.columnGap || styles.gap || 0);
       const paddingLeft = parseFloat(styles.paddingLeft || 0);
       const paddingRight = parseFloat(styles.paddingRight || 0);
       const containerWidth = gallery.clientWidth - paddingLeft - paddingRight;
-      if (!Number.isFinite(containerWidth) || containerWidth <= 0) return;
-
-      let didApplyLayout = false;
 
       for (let i = 0; i < images.length; i += perRow) {
         const rowImages = images.slice(i, i + perRow);
@@ -411,7 +398,6 @@ if (justifiedGalleries.length) {
         if (!totalRatio) continue;
 
         const rowHeight = (containerWidth - (gap * (perRow - 1))) / totalRatio;
-        if (!Number.isFinite(rowHeight) || rowHeight <= 0) return;
 
         rowImages.forEach((img, idx) => {
           const width = ratios[idx] * rowHeight;
@@ -422,12 +408,6 @@ if (justifiedGalleries.length) {
           img.style.width = '100%';
           img.style.height = `${rowHeight}px`;
         });
-
-        didApplyLayout = true;
-      }
-
-      if (didApplyLayout) {
-        gallery.classList.add('is-justified-active');
       }
     });
 
