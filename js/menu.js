@@ -79,6 +79,7 @@ function supportsStableScrollbarGutter() {
 function lockPageScrollForMenu() {
   scrollbarWidth = getScrollbarWidth();
   useStableScrollbarGutter = supportsStableScrollbarGutter() && scrollbarWidth > 0;
+  root.classList.add("menu-open-root");
 
   if (useStableScrollbarGutter) {
     root.style.scrollbarGutter = "stable";
@@ -98,6 +99,7 @@ function lockPageScrollForMenu() {
 function unlockPageScrollForMenu() {
   root.style.overflow = "";
   root.style.scrollbarGutter = "";
+  root.classList.remove("menu-open-root");
   document.body.style.paddingRight = "";
   hamburger.style.right = "";
   menu.style.removeProperty("--scrollbar-width");

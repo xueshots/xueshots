@@ -147,6 +147,22 @@ body.dark::-webkit-scrollbar-thumb { background: #333; }
 body.light::-webkit-scrollbar-thumb { background: #ccc; }
 body.yellow::-webkit-scrollbar-thumb { background: #cc9900; }
 
+html.menu-open-root,
+body.menu-open {
+  background: #FFB800;
+  scrollbar-color: #FFB800 #FFB800;
+}
+
+html.menu-open-root::-webkit-scrollbar-track,
+body.menu-open::-webkit-scrollbar-track {
+  background: #FFB800;
+}
+
+html.menu-open-root::-webkit-scrollbar-thumb,
+body.menu-open::-webkit-scrollbar-thumb {
+  background: #FFB800;
+}
+
 /* =============================
    HEADER (GLOBAL)
 ============================= */
