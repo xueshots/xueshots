@@ -7,12 +7,121 @@ const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
 const HAMBURGER_RIGHT = 60;
 
+function ensureMobileMenuStructure() {
+  const menuMain = document.querySelector(".menu-main");
+  if (!menuMain) return;
+
+  const hasMainLinksWrapper = Array.from(menuMain.children).some((child) =>
+    child.classList.contains("menu-main-links")
+  );
+
+  if (hasMainLinksWrapper) return;
+
+  const mainLinksWrapper = document.createElement("div");
+  mainLinksWrapper.className = "menu-main-links";
+
+  const footer = Array.from(menuMain.children).find((child) =>
+    child.classList.contains("menu-footer")
+  );
+
+  Array.from(menuMain.children).forEach((child) => {
+    if (child !== footer) {
+      mainLinksWrapper.appendChild(child);
+    }
+  });
+
+  if (footer) {
+    menuMain.insertBefore(mainLinksWrapper, footer);
+    return;
+  }
+
+  menuMain.appendChild(mainLinksWrapper);
+}
+
+ensureMobileMenuStructure();
+
+const menuMain = document.querySelector(".menu-main");
+const menuWriting = document.querySelector(".menu-writing");
+const menuMainLinks = document.querySelector(".menu-main-links");
+const menuWritingLinks = document.querySelector(".menu-writing-links");
+const menuMainFooter = menuMain
+  ? Array.from(menuMain.children).find((child) => child.classList.contains("menu-footer"))
+  : null;
+const menuWritingFooter = menuWriting
+  ? Array.from(menuWriting.children).find((child) => child.classList.contains("menu-footer"))
+  : null;
+
 let isMenuOpen = false;
 let isMenuAnimating = false;
 let scrollbarWidth = 0;
 
 function getScrollbarWidth() {
   return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+}
+
+function getVisibleViewportHeight() {
+  if (window.visualViewport) {
+    return Math.round(window.visualViewport.height);
+  }
+
+  return window.innerHeight;
+}
+
+function getElementHeight(element) {
+  if (!element) return 0;
+  return element.getBoundingClientRect().height;
+}
+
+function getMobileMenuPanelRequiredHeight(panel, content, footer) {
+  if (!panel || !content) return 0;
+
+  const panelStyle = window.getComputedStyle(panel);
+  const paddingTop = parseFloat(panelStyle.paddingTop) || 0;
+  const paddingBottom = parseFloat(panelStyle.paddingBottom) || 0;
+  const rowGap = parseFloat(panelStyle.rowGap) || 0;
+
+  return paddingTop + paddingBottom + getElementHeight(content) + getElementHeight(footer) + rowGap;
+}
+
+function clearMobileMenuFit() {
+  if (!menu) return;
+  menu.style.removeProperty("--mobile-menu-viewport-height");
+  menu.style.removeProperty("--mobile-menu-fit-scale");
+}
+
+function syncMobileMenuFit() {
+  if (!menu) return;
+
+  if (window.innerWidth >= 1024) {
+    clearMobileMenuFit();
+    return;
+  }
+
+  const viewportHeight = getVisibleViewportHeight();
+  let fitScale = 1;
+
+  menu.style.setProperty("--mobile-menu-viewport-height", `${viewportHeight}px`);
+  menu.style.setProperty("--mobile-menu-fit-scale", "1");
+
+  for (let pass = 0; pass < 2; pass += 1) {
+    const mainRequiredHeight = getMobileMenuPanelRequiredHeight(menuMain, menuMainLinks, menuMainFooter);
+    const writingRequiredHeight = getMobileMenuPanelRequiredHeight(menuWriting, menuWritingLinks, menuWritingFooter);
+    const requiredHeight = Math.max(mainRequiredHeight, writingRequiredHeight);
+
+    if (!requiredHeight) {
+      break;
+    }
+
+    const nextScale = Math.min(1, (viewportHeight - 2) / requiredHeight);
+    fitScale = Math.max(0.56, Math.min(fitScale, nextScale));
+    menu.style.setProperty("--mobile-menu-fit-scale", fitScale.toFixed(3));
+  }
+}
+
+function syncMobileMenuFitIfOpen() {
+  if (isMenuOpen) {
+    syncMobileMenuFit();
+  }
 }
 
 /* ============================
@@ -100,6 +209,8 @@ function toggleMenu() {
   body.classList.toggle("menu-open");
 
   if (isMenuOpen) {
+    syncMobileMenuFit();
+
     // Measure scrollbar width before hiding it
     scrollbarWidth = getScrollbarWidth();
 
@@ -114,6 +225,8 @@ function toggleMenu() {
 
     // Keep menu panels centered
     menu.style.setProperty("--scrollbar-width", scrollbarWidth + "px");
+
+    syncMobileMenuFit();
   } else {
     // Restore scroll and layout AFTER animation completes to prevent jump
     setTimeout(() => {
@@ -179,6 +292,8 @@ let menuResizeTimeout;
 let isResizing = false;
 
 window.addEventListener("resize", () => {
+  syncMobileMenuFit();
+
   if (!isResizing) {
     isResizing = true;
     // Instantly hide menu during resize to prevent flash
@@ -208,13 +323,28 @@ window.addEventListener("resize", () => {
   }, 100);
 });
 
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", syncMobileMenuFitIfOpen);
+  window.visualViewport.addEventListener("scroll", syncMobileMenuFitIfOpen);
+}
+
+if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
+  document.fonts.ready.then(() => {
+    syncMobileMenuFit();
+  });
+}
+
+window.addEventListener("pageshow", syncMobileMenuFit);
+
+syncMobileMenuFit();
+
 /* ============================
    DESKTOP SLIDING UNDERLINE
 ============================ */
 function initUnderline() {
   if (window.innerWidth < 1024) return;
 
-  const links = Array.from(document.querySelectorAll(".menu-main > a:not(.instagram-link), .writing-nav > a"));
+  const links = Array.from(document.querySelectorAll(".menu-main-links > a:not(.instagram-link), .menu-main > a:not(.instagram-link), .writing-nav > a"));
 
   const u1 = document.createElement("div");
   u1.className = "menu-underline";
