@@ -1047,6 +1047,10 @@ body.page.writing.hawaiibigisland .writing-figure.xsmall {
   gap: var(--writing-caption-gap); /* controls padding between simple image and caption */
 }
 
+.writing-gallery > .writing-figure {
+  min-width: 0;
+}
+
 .writing-figure.is-empty {
   visibility: hidden;
   pointer-events: none;
@@ -2051,14 +2055,15 @@ body.yellow .hamburger span {
   }
 
   body.page.writing.thailand .way-of-water-gallery {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--gallery-gap);
-    align-items: flex-start;
+    align-items: start;
   }
 
   body.page.writing.thailand .way-of-water-gallery .writing-figure {
-    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
   }
 
   body.page.writing.thailand .way-of-water-gallery .writing-figure img {
@@ -2269,16 +2274,26 @@ body.light {
   }
 
   .writing-gallery.gallery-2x1.justified {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .writing-gallery.gallery-2x1.justified .writing-figure {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .writing-gallery.gallery-2x1.justified.is-justified-active {
     display: flex;
     flex-wrap: wrap;
     gap: var(--gallery-gap);
     align-items: flex-start;
   }
 
-  .writing-gallery.gallery-2x1.justified .writing-figure {
+  .writing-gallery.gallery-2x1.justified.is-justified-active .writing-figure {
     flex: 0 0 calc((100% - var(--gallery-gap)) / 2);
     width: calc((100% - var(--gallery-gap)) / 2);
-    min-width: 0;
   }
 
   .writing-gallery.gallery-2x1.justified .writing-figure img {
@@ -2289,16 +2304,26 @@ body.light {
   }
 
   .writing-gallery.gallery-3x1.justified {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .writing-gallery.gallery-3x1.justified .writing-figure {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .writing-gallery.gallery-3x1.justified.is-justified-active {
     display: flex;
     flex-wrap: wrap;
     gap: var(--gallery-gap);
     align-items: flex-start;
   }
 
-  .writing-gallery.gallery-3x1.justified .writing-figure {
+  .writing-gallery.gallery-3x1.justified.is-justified-active .writing-figure {
     flex: 0 0 calc((100% - (var(--gallery-gap) * 2)) / 3);
     width: calc((100% - (var(--gallery-gap) * 2)) / 3);
-    min-width: 0;
   }
 
   .writing-gallery.gallery-3x1.justified .writing-figure img {
