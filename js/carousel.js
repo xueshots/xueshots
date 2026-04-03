@@ -2,13 +2,6 @@
    CONFIG
 ============================ */
 const AUTO_SLIDE_DELAY = 4000;
-const SLOW_SWIPE_ADVANCE_RATIO = 0.5;
-const FAST_SWIPE_DISTANCE_RATIO = 0.08;
-const FLICK_VELOCITY_THRESHOLD = 0.55;
-const DRAG_VELOCITY_WINDOW = 120;
-const SNAP_MIN_DURATION = 360;
-const SNAP_MAX_DURATION = 560;
-const SNAP_EASING = "linear";
 
 /* ============================
    ELEMENTS
@@ -29,12 +22,7 @@ track.style.transform = 'translate3d(0, 0, 0)';
 ============================ */
 let currentIndex = 1;
 let currentTranslate = 0;
-let prevTranslate = 0;
-let startX = 0;
-let dragVelocity = 0;
-let dragSamples = [];
 
-let isDragging = false;
 let isAnimating = false;
 let pointerType = null;
 let autoSlideTimer = null;
@@ -242,10 +230,6 @@ if (autoplayToggle) {
    POINTER EVENTS
 ============================ */
 carousel.addEventListener("pointerdown", onPointerDown);
-carousel.addEventListener("pointermove", onPointerMove);
-carousel.addEventListener("pointerup", onPointerUp);
-carousel.addEventListener("pointercancel", onPointerUp);
-carousel.addEventListener("pointerleave", onPointerUp);
 
 function onPointerDown(e) {
   pointerType = e.pointerType;
@@ -255,54 +239,7 @@ function onPointerDown(e) {
     if (e.button !== 0) return; // 0 = left click only
     if (isAnimating) return;
     manualMoveToSlide(currentIndex + 1);
-    return;
   }
-
-  /* Mobile / tablet / stylus */
-  isDragging = true;
-  startX = e.clientX;
-  prevTranslate = currentTranslate;
-  dragVelocity = 0;
-  dragSamples = [];
-  recordDragSample(e.clientX);
-
-  stopAutoSlide();
-  carousel.setPointerCapture(e.pointerId);
-}
-
-function onPointerMove(e) {
-  if (!isDragging) return;
-
-  const delta = e.clientX - startX;
-  currentTranslate = prevTranslate + delta;
-  recordDragSample(e.clientX);
-  setTranslate(currentTranslate, false);
-}
-
-function onPointerUp(e) {
-  if (!isDragging) return;
-
-  isDragging = false;
-  carousel.releasePointerCapture(e.pointerId);
-  recordDragSample(e.clientX);
-
-  const movedBy = currentTranslate - prevTranslate;
-  const absoluteDistance = Math.abs(movedBy);
-  const slowSwipeThreshold = slideWidth * SLOW_SWIPE_ADVANCE_RATIO;
-  const fastSwipeDistanceFloor = slideWidth * FAST_SWIPE_DISTANCE_RATIO;
-  const isFastSwipe = absoluteDistance >= fastSwipeDistanceFloor && Math.abs(dragVelocity) >= FLICK_VELOCITY_THRESHOLD;
-
-  if (isFastSwipe) {
-    if (dragVelocity < 0) currentIndex += 1;
-    else if (dragVelocity > 0) currentIndex -= 1;
-  } else if (absoluteDistance >= slowSwipeThreshold) {
-    if (movedBy < 0) currentIndex += 1;
-    else if (movedBy > 0) currentIndex -= 1;
-  }
-
-  resumeAutoSlideFromManualNavigation();
-  snapToSlide(dragVelocity);
-  startAutoSlide();
 }
 
 /* Disable right click menu */
@@ -313,16 +250,11 @@ document.addEventListener("contextmenu", (e) => {
 });
 
 /* ============================
-   TAP LEFT / RIGHT (MOBILE)
+   TAP TO ADVANCE (MOBILE)
 ============================ */
-carousel.addEventListener("click", (e) => {
-  if (pointerType === "mouse" || isDragging || isAnimating) return;
-
-  const rect = carousel.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-
-  if (x > rect.width / 2) manualMoveToSlide(currentIndex + 1);
-  else manualMoveToSlide(currentIndex - 1);
+carousel.addEventListener("click", () => {
+  if (pointerType === "mouse" || isAnimating) return;
+  manualMoveToSlide(currentIndex + 1);
 });
 
 /* Disable long press (mobile) */
@@ -374,55 +306,6 @@ function moveToSlide(index, options = {}) {
   currentIndex = index;
   currentTranslate = -currentIndex * slideWidth;
   setTranslate(currentTranslate, true, options);
-}
-
-function snapToSlide(releaseVelocity = 0) {
-  const targetTranslate = -currentIndex * slideWidth;
-  const remainingDistance = Math.abs(targetTranslate - currentTranslate);
-  const distanceRatio = Math.min(remainingDistance / slideWidth, 1);
-  const velocityRatio = Math.min(Math.abs(releaseVelocity) / 1.2, 1);
-  const settleBoost = (1 - distanceRatio) * 120;
-  const travelBoost = distanceRatio * 60;
-  const duration = Math.round(
-    Math.max(
-      SNAP_MIN_DURATION,
-      Math.min(
-        SNAP_MAX_DURATION,
-        420 + settleBoost + travelBoost - (velocityRatio * 60)
-      )
-    )
-  );
-
-  moveToSlide(currentIndex, {
-    duration,
-    easing: SNAP_EASING
-  });
-}
-
-function recordDragSample(x) {
-  const now = performance.now();
-  dragSamples.push({ x, time: now });
-
-  const cutoff = now - DRAG_VELOCITY_WINDOW;
-  while (dragSamples.length > 2 && dragSamples[0].time < cutoff) {
-    dragSamples.shift();
-  }
-
-  if (dragSamples.length < 2) {
-    dragVelocity = 0;
-    return;
-  }
-
-  const first = dragSamples[0];
-  const last = dragSamples[dragSamples.length - 1];
-  const elapsed = last.time - first.time;
-
-  if (elapsed <= 0) {
-    dragVelocity = 0;
-    return;
-  }
-
-  dragVelocity = (last.x - first.x) / elapsed;
 }
 
 /* ============================
