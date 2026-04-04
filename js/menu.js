@@ -166,11 +166,11 @@ function syncWritingMenuTextScale() {
 
   menu.style.setProperty("--mobile-writing-menu-text-scale", "1");
 
+  const availableWidth = menuWritingLinks.getBoundingClientRect().width;
   let widestRatio = 1;
 
   writingPageLinks.forEach((link) => {
-    const availableWidth = link.clientWidth;
-    const requiredWidth = link.scrollWidth;
+    const requiredWidth = link.getBoundingClientRect().width;
 
     if (availableWidth > 0 && requiredWidth > 0) {
       widestRatio = Math.max(widestRatio, requiredWidth / availableWidth);
