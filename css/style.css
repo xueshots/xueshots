@@ -237,6 +237,7 @@ body:not(.dark) .logo {   /* adding in logo as well */
 .menu {
   --mobile-menu-viewport-height: 100dvh;
   --mobile-menu-fit-scale: 1;
+  --mobile-writing-menu-text-scale: 1;
   --mobile-menu-footer-bottom: 30px;
   --mobile-menu-scroll-top: 84px;
   position: fixed;
@@ -2259,8 +2260,12 @@ body.light {
 
 /* Writing mobile menu font change */
 .menu-writing a {
-  font-size: calc(3rem * var(--mobile-menu-fit-scale));
+  font-size: calc(3rem * var(--mobile-menu-fit-scale) * var(--mobile-writing-menu-text-scale));
   font-weight: 400;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 /* =============================

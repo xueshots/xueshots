@@ -144,9 +144,41 @@ function clearMobileMenuFit() {
   if (!menu) return;
   menu.style.removeProperty("--mobile-menu-viewport-height");
   menu.style.removeProperty("--mobile-menu-fit-scale");
+  menu.style.removeProperty("--mobile-writing-menu-text-scale");
   menu.style.removeProperty("--mobile-menu-footer-bottom");
   menu.style.removeProperty("--mobile-menu-scroll-top");
   menu.classList.remove("menu-scrollable");
+}
+
+function syncWritingMenuTextScale() {
+  if (!menu || !menuWritingLinks) return;
+
+  if (window.innerWidth >= 1024) {
+    menu.style.removeProperty("--mobile-writing-menu-text-scale");
+    return;
+  }
+
+  const writingPageLinks = Array.from(menuWritingLinks.querySelectorAll("a"));
+  if (!writingPageLinks.length) {
+    menu.style.removeProperty("--mobile-writing-menu-text-scale");
+    return;
+  }
+
+  menu.style.setProperty("--mobile-writing-menu-text-scale", "1");
+
+  let widestRatio = 1;
+
+  writingPageLinks.forEach((link) => {
+    const availableWidth = link.clientWidth;
+    const requiredWidth = link.scrollWidth;
+
+    if (availableWidth > 0 && requiredWidth > 0) {
+      widestRatio = Math.max(widestRatio, requiredWidth / availableWidth);
+    }
+  });
+
+  const textScale = Math.min(1, 1 / widestRatio);
+  menu.style.setProperty("--mobile-writing-menu-text-scale", textScale.toFixed(4));
 }
 
 function syncMobileMenuFit() {
@@ -161,9 +193,12 @@ function syncMobileMenuFit() {
 
   menu.style.setProperty("--mobile-menu-viewport-height", `${viewportHeight}px`);
   menu.style.setProperty("--mobile-menu-fit-scale", "1");
+  menu.style.setProperty("--mobile-writing-menu-text-scale", "1");
   menu.style.setProperty("--mobile-menu-footer-bottom", `${MOBILE_MENU_FOOTER_OFFSET}px`);
   menu.style.setProperty("--mobile-menu-scroll-top", `${MOBILE_MENU_SCROLL_TOP}px`);
   menu.classList.remove("menu-scrollable");
+
+  syncWritingMenuTextScale();
 
   const mainRequiredHeight = getCenteredMenuPanelRequiredHeight(
     menuMainLinks,
