@@ -16,7 +16,12 @@ const rootStyle = document.documentElement.style;
 
 let slides = Array.from(document.querySelectorAll(".carousel-slide"));
 
-let slideWidth = window.innerWidth;
+function getCarouselWidth() {
+  if (!carousel) return window.innerWidth;
+  return Math.round(carousel.getBoundingClientRect().width) || window.innerWidth;
+}
+
+let slideWidth = getCarouselWidth();
 
 // Force hardware acceleration on track
 track.style.transform = 'translate3d(0, 0, 0)';
@@ -136,6 +141,13 @@ function syncHomeViewportMetrics() {
   rootStyle.setProperty("--home-carousel-controls-gap", `${controlsGap}px`);
 }
 
+function syncCarouselPosition() {
+  slideWidth = getCarouselWidth();
+  currentTranslate = -currentIndex * slideWidth;
+  isAnimating = false;
+  setTranslate(currentTranslate, false);
+}
+
 function updateIntroCrop() {
   const { width: winW, height: winH } = getVisibleViewportSize();
   let posX, posY;
@@ -177,12 +189,15 @@ function updateIntroCrop() {
 
 syncHomeViewportMetrics();
 updateIntroCrop();
+syncCarouselPosition();
 window.addEventListener('resize', updateIntroCrop);
 window.addEventListener("resize", syncHomeViewportMetrics);
+window.addEventListener("resize", syncCarouselPosition);
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", syncHomeViewportMetrics);
   window.visualViewport.addEventListener("resize", updateIntroCrop);
+  window.visualViewport.addEventListener("resize", syncCarouselPosition);
   window.visualViewport.addEventListener("scroll", syncHomeViewportMetrics);
 }
 
@@ -385,26 +400,11 @@ track.addEventListener("transitionend", () => {
    RESIZE
 ============================ */
 let resizeTimeout;
-let oldWidth = window.innerWidth;
 
 window.addEventListener("resize", () => {
   // Stop auto-slide during resize
   stopAutoSlide();
-
-  // Get new window width
-  const newWidth = window.innerWidth;
-
-  // Calculate proportion of translate to new width
-  const scale = newWidth / oldWidth;
-  currentTranslate *= scale;
-
-  // Update the transform immediately without animation
-  track.style.transition = "none";
-  track.style.transform = `translateX(${currentTranslate}px)`;
-
-  // Update slideWidth for future moves
-  slideWidth = newWidth;
-  oldWidth = newWidth;
+  syncCarouselPosition();
 
   // Clear previous timeout
   clearTimeout(resizeTimeout);
