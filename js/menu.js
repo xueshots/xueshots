@@ -300,19 +300,25 @@ function toggleMenu() {
   const wasWritingOpen = menu.classList.contains("writing-open");
   isMenuOpen = !isMenuOpen;
 
-  hamburger.classList.toggle("is-open");
-  menu.classList.toggle("is-open");
-  body.classList.toggle("menu-open");
-
   if (isMenuOpen) {
+    hamburger.classList.add("is-open");
+    body.classList.add("menu-open");
+    menu.classList.add("is-visible");
     syncMobileMenuFit();
     lockPageScrollForMenu();
-
-    syncMobileMenuFit();
+    requestAnimationFrame(() => {
+      menu.classList.add("is-open");
+      syncMobileMenuFit();
+    });
   } else {
+    hamburger.classList.remove("is-open");
+    body.classList.remove("menu-open");
+    menu.classList.remove("is-open");
+
     // Restore scroll and layout AFTER animation completes to prevent jump
     setTimeout(() => {
       unlockPageScrollForMenu();
+      menu.classList.remove("is-visible");
     }, 500);
   }
 
@@ -392,6 +398,7 @@ window.addEventListener("resize", () => {
       isMenuOpen = false;
       hamburger.classList.remove("is-open");
       menu.classList.remove("is-open");
+      menu.classList.remove("is-visible");
       menu.classList.remove("writing-open");
       body.classList.remove("menu-open");
       unlockPageScrollForMenu();

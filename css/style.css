@@ -249,8 +249,15 @@ body:not(.dark) .logo {   /* adding in logo as well */
   color: #000000;
   height: var(--mobile-menu-viewport-height);
   overflow: hidden;
-  transform: translateY(100%);
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(calc(100% + 1px));
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu.is-visible {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .menu.is-open {
@@ -2675,6 +2682,8 @@ body.light {
     overflow: visible;
     height: auto;
     min-height: auto;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .menu.is-open {
