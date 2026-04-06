@@ -591,6 +591,7 @@ body.page.home .site-header {
 
 .carousel-wrapper {
   --carousel-controls-gap: var(--home-carousel-controls-gap, clamp(28px, 5vh, 44px));
+  --carousel-controls-row-height: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -672,7 +673,7 @@ body.page.home .site-header {
   justify-content: center;
   gap: 30px;
   margin-top: var(--carousel-controls-gap);
-  min-height: 40px;
+  min-height: var(--carousel-controls-row-height);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease;
@@ -2440,6 +2441,12 @@ body.light {
 
   .triple-layout .triple-image-3 {
     justify-self: center;
+  }
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .carousel-wrapper {
+    padding-top: calc((var(--carousel-controls-gap) * 2) + var(--carousel-controls-row-height));
   }
 }
 
