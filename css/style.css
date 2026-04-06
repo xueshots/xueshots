@@ -189,8 +189,8 @@ body.yellow::-webkit-scrollbar-thumb { background: #cc9900; }
    HAMBURGER (GLOBAL)
 ============================= */
 .hamburger {
-  position: absolute;
-  top: 46px;
+  position: fixed;
+  top: calc(max(46px, calc(env(safe-area-inset-top) + 20px)) + var(--mobile-viewport-offset-top, 0px));
   right: 60px;
   width: 35px;
   height: 15px;
@@ -591,7 +591,6 @@ body.page.home .site-header {
 
 .carousel-wrapper {
   --carousel-controls-gap: var(--home-carousel-controls-gap, clamp(28px, 5vh, 44px));
-  --carousel-controls-row-height: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -673,7 +672,7 @@ body.page.home .site-header {
   justify-content: center;
   gap: 30px;
   margin-top: var(--carousel-controls-gap);
-  min-height: var(--carousel-controls-row-height);
+  min-height: 40px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease;
@@ -2441,12 +2440,6 @@ body.light {
 
   .triple-layout .triple-image-3 {
     justify-self: center;
-  }
-}
-
-@media (orientation: landscape) and (hover: none) and (pointer: coarse) and (max-height: 500px) {
-  body.page.home .carousel-wrapper {
-    padding-top: calc((var(--carousel-controls-gap) * 2) + var(--carousel-controls-row-height));
   }
 }
 

@@ -5,6 +5,7 @@ const hamburger = document.querySelector(".hamburger");
 const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
+const rootStyle = document.documentElement.style;
 const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
@@ -50,6 +51,7 @@ function ensureMobileMenuStructure() {
 }
 
 ensureMobileMenuStructure();
+syncMobileViewportOffset();
 
 const menuMain = document.querySelector(".menu-main");
 const menuWriting = document.querySelector(".menu-writing");
@@ -68,6 +70,18 @@ let scrollbarWidth = 0;
 
 function getScrollbarWidth() {
   return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+}
+
+function getVisibleViewportOffsetTop() {
+  if (window.visualViewport) {
+    return Math.max(0, Math.round(window.visualViewport.offsetTop));
+  }
+
+  return 0;
+}
+
+function syncMobileViewportOffset() {
+  rootStyle.setProperty("--mobile-viewport-offset-top", `${getVisibleViewportOffsetTop()}px`);
 }
 
 function shouldCompensateForMenuScrollbar() {
@@ -421,6 +435,8 @@ window.addEventListener("resize", () => {
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", syncMobileMenuFitIfOpen);
   window.visualViewport.addEventListener("scroll", syncMobileMenuFitIfOpen);
+  window.visualViewport.addEventListener("resize", syncMobileViewportOffset);
+  window.visualViewport.addEventListener("scroll", syncMobileViewportOffset);
 }
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
@@ -429,7 +445,10 @@ if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then =
   });
 }
 
+window.addEventListener("resize", syncMobileViewportOffset);
+window.addEventListener("orientationchange", syncMobileViewportOffset);
 window.addEventListener("pageshow", syncMobileMenuFit);
+window.addEventListener("pageshow", syncMobileViewportOffset);
 
 syncMobileMenuFit();
 
