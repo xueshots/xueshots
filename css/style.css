@@ -2444,8 +2444,8 @@ body.light {
   }
 }
 
-@media (max-width: 767px) and (orientation: landscape) {
-  .carousel-wrapper {
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  body.page.home .carousel-wrapper {
     padding-top: calc((var(--carousel-controls-gap) * 2) + var(--carousel-controls-row-height));
   }
 }
