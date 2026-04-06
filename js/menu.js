@@ -70,9 +70,21 @@ function getScrollbarWidth() {
   return Math.max(0, window.innerWidth - document.documentElement.clientWidth);
 }
 
+function shouldCompensateForMenuScrollbar() {
+  return scrollbarWidth > 0 && !body.classList.contains("home");
+}
+
 function lockPageScrollForMenu() {
   scrollbarWidth = getScrollbarWidth();
   document.documentElement.style.overflow = "hidden";
+
+  if (!shouldCompensateForMenuScrollbar()) {
+    document.body.style.paddingRight = "";
+    hamburger.style.right = "";
+    menu.style.setProperty("--scrollbar-width", "0px");
+    return;
+  }
+
   document.body.style.paddingRight = `${scrollbarWidth}px`;
   hamburger.style.right = `${HAMBURGER_RIGHT + scrollbarWidth}px`;
   menu.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);
