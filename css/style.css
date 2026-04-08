@@ -189,8 +189,8 @@ body.yellow::-webkit-scrollbar-thumb { background: #cc9900; }
    HAMBURGER (GLOBAL)
 ============================= */
 .hamburger {
-  position: fixed;
-  top: calc(max(46px, calc(env(safe-area-inset-top) + 20px)) + var(--mobile-viewport-offset-top, 0px));
+  position: absolute;
+  top: max(46px, calc(env(safe-area-inset-top) + 20px));
   right: 60px;
   width: 35px;
   height: 15px;
@@ -202,6 +202,11 @@ body.yellow::-webkit-scrollbar-thumb { background: #cc9900; }
   background: none;
   padding: 0;
   z-index: 1001;
+}
+
+body.page.home .hamburger {
+  position: fixed;
+  top: calc(max(46px, calc(env(safe-area-inset-top) + 20px)) + var(--mobile-viewport-offset-top, 0px));
 }
 
 .hamburger span {
