@@ -117,6 +117,8 @@ body {
 }
 
 html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scrollbar-gutter: auto;
 }
 
@@ -969,6 +971,28 @@ body.page.writing p,
 body.page.about p,
 body.page.contact p {
   font-weight: 250;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  body.page.writing .writing-cover-quote {
+    font-size: clamp(1.2rem, 3.7vmin, 1.5rem);
+  }
+
+  body.page.writing .writing-cover-attrib {
+    font-size: clamp(0.9rem, 2vmin, 1.05rem);
+  }
+
+  body.page.writing .writing-title {
+    font-size: clamp(2.5rem, 7vmin, 5.25rem);
+  }
+
+  body.page.writing .writing-section-title {
+    font-size: clamp(1.65rem, 3.6vmin, 2.6rem);
+  }
+
+  body.page.writing .writing-glacier-title {
+    font-size: clamp(1rem, 4.2vmin, 1.6rem);
+  }
 }
 
 body.page.writing.alaskanpanhandle .writing-page {
