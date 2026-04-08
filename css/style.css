@@ -973,7 +973,7 @@ body.page.contact p {
   font-weight: 250;
 }
 
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
   body.page.writing .writing-cover-quote {
     font-size: clamp(1.2rem, 3.7vmin, 1.5rem);
   }
