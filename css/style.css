@@ -711,9 +711,11 @@ body.page.home .site-header {
   transition: color 0.2s ease;
 }
 
-.carousel-nav-button:hover,
-.carousel-autoplay-toggle:hover {
-  color: rgba(255, 255, 255, 0.68);
+@media (hover: hover) and (pointer: fine) {
+  .carousel-nav-button:hover,
+  .carousel-autoplay-toggle:hover {
+    color: rgba(255, 255, 255, 0.68);
+  }
 }
 
 .carousel-nav-button:focus-visible,
@@ -1806,10 +1808,12 @@ body.lightbox-open {
   z-index: 2001;
 }
 
-.lightbox-close:hover,
-.lightbox-prev:hover,
-.lightbox-next:hover {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-close:hover,
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    opacity: 1;
+  }
 }
 
 .lightbox-close svg,
@@ -1840,6 +1844,29 @@ body.lightbox-open {
 .lightbox.single-image .lightbox-prev,
 .lightbox.single-image .lightbox-next {
   display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .carousel-nav-button,
+  .carousel-autoplay-toggle {
+    color: #ffffff;
+    opacity: 0.56;
+    transition: opacity 220ms linear;
+  }
+
+  .lightbox-prev,
+  .lightbox-next {
+    opacity: 0.5;
+    transition: opacity 220ms linear;
+  }
+
+  .carousel-nav-button.is-touch-flashing,
+  .carousel-autoplay-toggle.is-touch-flashing,
+  .lightbox-prev.is-touch-flashing,
+  .lightbox-next.is-touch-flashing {
+    opacity: 1;
+    transition: none;
+  }
 }
 
 /* =============================

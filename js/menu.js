@@ -9,6 +9,58 @@ const menuRootStyle = document.documentElement.style;
 const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
+const TOUCH_CONTROL_FLASH_HOLD_MS = 95;
+const touchControlFlashTimers = new WeakMap();
+
+function triggerTouchControlFlash(control) {
+  if (!control) return;
+
+  control.classList.add("is-touch-flashing");
+
+  const existingTimer = touchControlFlashTimers.get(control);
+  if (existingTimer) {
+    window.clearTimeout(existingTimer);
+  }
+
+  const timer = window.setTimeout(() => {
+    control.classList.remove("is-touch-flashing");
+    touchControlFlashTimers.delete(control);
+  }, TOUCH_CONTROL_FLASH_HOLD_MS);
+
+  touchControlFlashTimers.set(control, timer);
+}
+
+function bindTouchControlFlash(control) {
+  if (!control) return;
+
+  if (window.PointerEvent) {
+    control.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (event.pointerType === "mouse") return;
+        triggerTouchControlFlash(control);
+      },
+      { passive: true }
+    );
+    return;
+  }
+
+  control.addEventListener(
+    "touchstart",
+    () => {
+      triggerTouchControlFlash(control);
+    },
+    { passive: true }
+  );
+}
+
+function initTouchControlFlash() {
+  const controls = document.querySelectorAll(
+    ".carousel-nav-button, .carousel-autoplay-toggle, .lightbox-prev, .lightbox-next"
+  );
+
+  controls.forEach(bindTouchControlFlash);
+}
 
 function ensureMobileMenuStructure() {
   const menuMain = document.querySelector(".menu-main");
@@ -51,6 +103,7 @@ function ensureMobileMenuStructure() {
 }
 
 ensureMobileMenuStructure();
+initTouchControlFlash();
 syncMobileViewportOffset();
 
 const menuMain = document.querySelector(".menu-main");
