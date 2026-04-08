@@ -301,10 +301,22 @@ function initImageRevealSet(root = document) {
   });
 }
 
+function forceHomepageHeroImagesVisible() {
+  if (!body.classList.contains("home")) return;
+
+  document
+    .querySelectorAll(".intro-slide img, .carousel-slide img")
+    .forEach((image) => {
+      image.classList.add("is-loaded");
+    });
+}
+
 window.initImageReveal = initImageReveal;
 window.initImageRevealSet = initImageRevealSet;
 
 initImageRevealSet();
+window.addEventListener("load", forceHomepageHeroImagesVisible);
+window.addEventListener("pageshow", forceHomepageHeroImagesVisible);
 
 /* ============================
    MOBILE MENU TOGGLE
