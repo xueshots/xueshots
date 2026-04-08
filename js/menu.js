@@ -354,6 +354,44 @@ function initImageRevealSet(root = document) {
   });
 }
 
+const VISIBLE_LAZY_IMAGE_MARGIN = 240;
+let visibleLazyImagePrimeTimeout = 0;
+
+function isNearViewport(element, margin = VISIBLE_LAZY_IMAGE_MARGIN) {
+  const rect = element.getBoundingClientRect();
+  return rect.bottom > -margin && rect.top < window.innerHeight + margin;
+}
+
+function primeVisibleLazyImages(root = document) {
+  root.querySelectorAll('img[loading="lazy"]').forEach((image) => {
+    if (!(image instanceof HTMLImageElement)) return;
+    if (!image.getAttribute("src")) return;
+    if (!isNearViewport(image)) return;
+
+    image.loading = "eager";
+    image.setAttribute("fetchpriority", "high");
+
+    if (image.complete && image.naturalWidth > 0) {
+      revealImage(image);
+    }
+  });
+
+  if (typeof window.loadVisibleMasonryImages === "function") {
+    window.loadVisibleMasonryImages();
+  }
+}
+
+function scheduleVisibleLazyImagePrime() {
+  clearTimeout(visibleLazyImagePrimeTimeout);
+  visibleLazyImagePrimeTimeout = window.setTimeout(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        primeVisibleLazyImages();
+      });
+    });
+  }, 120);
+}
+
 function forceHomepageHeroImagesVisible() {
   if (!body.classList.contains("home")) return;
 
@@ -368,8 +406,17 @@ window.initImageReveal = initImageReveal;
 window.initImageRevealSet = initImageRevealSet;
 
 initImageRevealSet();
+scheduleVisibleLazyImagePrime();
 window.addEventListener("load", forceHomepageHeroImagesVisible);
 window.addEventListener("pageshow", forceHomepageHeroImagesVisible);
+window.addEventListener("load", scheduleVisibleLazyImagePrime, { once: true });
+window.addEventListener("pageshow", scheduleVisibleLazyImagePrime);
+window.addEventListener("resize", scheduleVisibleLazyImagePrime);
+window.addEventListener("orientationchange", scheduleVisibleLazyImagePrime);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", scheduleVisibleLazyImagePrime);
+}
 
 /* ============================
    MOBILE MENU TOGGLE

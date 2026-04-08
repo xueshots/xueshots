@@ -14,9 +14,13 @@ let activeGroup = [];
 let activeIndex = 0;
 let allowNavigation = false;
 
-function loadMasonryImage(img, revealIndividually = true) {
+function loadMasonryImage(img, revealIndividually = true, loadedImageSources = null) {
   const imageSrc = img.dataset.src;
   if (!imageSrc) return;
+
+  if (loadedImageSources instanceof Set) {
+    loadedImageSources.add(imageSrc);
+  }
 
   img.src = imageSrc;
   img.removeAttribute('data-src');
@@ -160,6 +164,7 @@ if (hasLightbox) {
    MASONRY LAYOUT
 ============================ */
 if (galleries.length > 0) {
+  const MASONRY_VISIBLE_LOAD_MARGIN = 240;
   const pageName = document.body.classList.contains('sports') ? 'sports' :
                    document.body.classList.contains('landscape') ? 'landscape' :
                    document.body.classList.contains('wildlife') ? 'wildlife' : '';
@@ -170,8 +175,14 @@ if (galleries.length > 0) {
     mobileImages: JSON.parse(gallery.dataset.imagesMobile || '[]'),
     imagePath: gallery.dataset.imagePath || `assets/images/${pageName}/`,
     images: [],
-    columns: []
+    columns: [],
+    loadedImageSources: new Set()
   }));
+
+  function isNearViewport(element, margin = MASONRY_VISIBLE_LOAD_MARGIN) {
+    const rect = element.getBoundingClientRect();
+    return rect.bottom > -margin && rect.top < window.innerHeight + margin;
+  }
 
   function getColumnCount() {
     return window.innerWidth < 768 ? 2 : 3;
@@ -203,6 +214,7 @@ if (galleries.length > 0) {
 
       const item = document.createElement('div');
       item.className = 'gallery-item';
+      item.__masonryState = state;
 
       const imageSrc = state.imagePath + filename;
       const meta = imageMeta[imageSrc] || null;
@@ -224,6 +236,17 @@ if (galleries.length > 0) {
       item.appendChild(img);
       state.columns[sourceIndex % state.columns.length].appendChild(item);
       masonryItems.push(item);
+
+      if (state.loadedImageSources.has(imageSrc)) {
+        img.src = imageSrc;
+        img.removeAttribute('data-src');
+
+        if (typeof window.initImageReveal === 'function') {
+          window.initImageReveal(img);
+        } else {
+          img.classList.add('is-loaded');
+        }
+      }
 
       if (hasLightbox) {
         const openIndex = renderedIndex;
@@ -247,7 +270,7 @@ if (galleries.length > 0) {
       .filter(Boolean);
 
     initialImages.forEach((img) => {
-      loadMasonryImage(img, false);
+      loadMasonryImage(img, false, state.loadedImageSources);
     });
 
     Promise.allSettled(initialImages.map((img) => waitForMasonryImage(img))).then(() => {
@@ -271,11 +294,38 @@ if (galleries.length > 0) {
         return;
       }
 
-      loadMasonryImage(img);
+      loadMasonryImage(img, true, state.loadedImageSources);
     });
   }
 
+  function loadVisibleMasonryImages(margin = MASONRY_VISIBLE_LOAD_MARGIN) {
+    states.forEach((state) => {
+      state.gallery.querySelectorAll('.gallery-item').forEach((item) => {
+        const img = item.querySelector('img[data-src]');
+        if (!img || !isNearViewport(item, margin)) return;
+
+        loadMasonryImage(img, true, state.loadedImageSources);
+        masonryLoadObserver?.unobserve(item);
+      });
+    });
+  }
+
+  let visibleLoadTimeout;
+  const scheduleVisibleMasonryLoad = () => {
+    clearTimeout(visibleLoadTimeout);
+    visibleLoadTimeout = setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          loadVisibleMasonryImages();
+        });
+      });
+    }, 120);
+  };
+
+  window.loadVisibleMasonryImages = loadVisibleMasonryImages;
+
   states.forEach(generateGallery);
+  scheduleVisibleMasonryLoad();
 
   let resizeTimeout;
   window.addEventListener('resize', () => {
@@ -287,8 +337,13 @@ if (galleries.length > 0) {
       if (oldColumnCount !== newColumnCount) {
         states.forEach(generateGallery);
       }
+
+      scheduleVisibleMasonryLoad();
     }, 250);
   });
+
+  window.addEventListener('orientationchange', scheduleVisibleMasonryLoad);
+  window.addEventListener('pageshow', scheduleVisibleMasonryLoad);
 }
 
 /* ============================
