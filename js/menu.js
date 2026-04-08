@@ -9,7 +9,7 @@ const menuRootStyle = document.documentElement.style;
 const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
-const TOUCH_CONTROL_FLASH_HOLD_MS = 95;
+const TOUCH_CONTROL_FLASH_HOLD_MS = 140;
 const touchControlFlashTimers = new WeakMap();
 
 function triggerTouchControlFlash(control) {
