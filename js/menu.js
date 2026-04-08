@@ -303,6 +303,10 @@ function syncMobileMenuFitIfOpen() {
    IMAGE REVEAL
 ============================ */
 function finishImageReveal(image) {
+  image.dataset.keepLoaded = "true";
+  if (image.loading === "lazy") {
+    image.loading = "eager";
+  }
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       image.classList.add("is-loaded");
@@ -324,6 +328,10 @@ function revealImage(image) {
 function initImageReveal(image) {
   if (!(image instanceof HTMLImageElement) || image.classList.contains("lightbox-image")) {
     return;
+  }
+
+  if (image.dataset.keepLoaded === "true" && image.loading === "lazy") {
+    image.loading = "eager";
   }
 
   if (!image.dataset.revealBound) {
@@ -363,7 +371,7 @@ function isNearViewport(element, margin = VISIBLE_LAZY_IMAGE_MARGIN) {
 }
 
 function primeVisibleLazyImages(root = document) {
-  root.querySelectorAll('img[loading="lazy"]').forEach((image) => {
+  root.querySelectorAll('img[loading="lazy"], img[data-keep-loaded="true"]').forEach((image) => {
     if (!(image instanceof HTMLImageElement)) return;
     if (!image.getAttribute("src")) return;
     if (!isNearViewport(image)) return;

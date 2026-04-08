@@ -22,8 +22,11 @@ function loadMasonryImage(img, revealIndividually = true, loadedImageSources = n
     loadedImageSources.add(imageSrc);
   }
 
+  img.loading = 'eager';
+  img.setAttribute('fetchpriority', 'high');
   img.src = imageSrc;
   img.removeAttribute('data-src');
+  img.dataset.keepLoaded = 'true';
 
   if (revealIndividually && typeof window.initImageReveal === 'function') {
     window.initImageReveal(img);
@@ -238,8 +241,11 @@ if (galleries.length > 0) {
       masonryItems.push(item);
 
       if (state.loadedImageSources.has(imageSrc)) {
+        img.loading = 'eager';
+        img.setAttribute('fetchpriority', 'high');
         img.src = imageSrc;
         img.removeAttribute('data-src');
+        img.dataset.keepLoaded = 'true';
 
         if (typeof window.initImageReveal === 'function') {
           window.initImageReveal(img);
