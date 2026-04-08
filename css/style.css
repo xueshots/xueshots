@@ -2077,7 +2077,7 @@ body.yellow .hamburger span {
   opacity: 1;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .about-inner,
   .contact-inner {
     height: calc(100dvh - var(--header-height));
