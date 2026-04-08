@@ -5,7 +5,7 @@ const hamburger = document.querySelector(".hamburger");
 const menu = document.querySelector(".menu");
 const menuPanels = document.querySelector(".menu-panels");
 const body = document.body;
-const rootStyle = document.documentElement.style;
+const menuRootStyle = document.documentElement.style;
 const HAMBURGER_RIGHT = 60;
 const MOBILE_MENU_FOOTER_OFFSET = 30;
 const MOBILE_MENU_SCROLL_TOP = 84;
@@ -81,7 +81,7 @@ function getVisibleViewportOffsetTop() {
 }
 
 function syncMobileViewportOffset() {
-  rootStyle.setProperty("--mobile-viewport-offset-top", `${getVisibleViewportOffsetTop()}px`);
+  menuRootStyle.setProperty("--mobile-viewport-offset-top", `${getVisibleViewportOffsetTop()}px`);
 }
 
 function shouldCompensateForMenuScrollbar() {
