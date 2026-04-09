@@ -2037,7 +2037,10 @@ body.yellow .hamburger span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #000000;
+  background: linear-gradient(to right, #FFB800 0 50%, #000000 50% 100%);
+  background-size: 200% 100%;
+  background-position: right center;
+  background-repeat: no-repeat;
   color: #ffffff;
   border: none;
   font-family: var(--font-body);
@@ -2049,32 +2052,11 @@ body.yellow .hamburger span {
   cursor: pointer;
   margin-top: 8px;
   border-radius: 50px;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  transition: color 0.3s ease;
-}
-
-.contact-submit::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  bottom: -1px;
-  left: calc(-140% - 6px);
-  width: calc(140% + 12px);
-  background: #FFB800;
-  border-radius: 999px;
-  transform: translate3d(0, 0, 0);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-  z-index: -1;
-}
-
-.contact-submit:hover::before {
-  transform: translate3d(calc(100% + 12px), 0, 0);
+  transition: background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
 }
 
 .contact-submit:hover {
+  background-position: left center;
   color: #000000;
 }
 
