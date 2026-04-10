@@ -2032,6 +2032,26 @@ body.yellow .hamburger span {
   height: clamp(96px, 12vh, 120px);
 }
 
+body.yellow .form-field input::selection,
+body.yellow .form-field textarea::selection {
+  background: rgba(0, 0, 0, 0.14);
+  color: #000000;
+}
+
+body.yellow .form-field input:is(:-webkit-autofill, :autofill),
+body.yellow .form-field input:is(:-webkit-autofill, :autofill):hover,
+body.yellow .form-field input:is(:-webkit-autofill, :autofill):focus,
+body.yellow .form-field textarea:is(:-webkit-autofill, :autofill),
+body.yellow .form-field textarea:is(:-webkit-autofill, :autofill):hover,
+body.yellow .form-field textarea:is(:-webkit-autofill, :autofill):focus {
+  -webkit-text-fill-color: #000000;
+  caret-color: #000000;
+  border-bottom-color: #000000;
+  box-shadow: 0 0 0 1000px #FFB800 inset;
+  -webkit-box-shadow: 0 0 0 1000px #FFB800 inset;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
 .contact-submit {
   align-self: flex-start;
   display: inline-flex;
