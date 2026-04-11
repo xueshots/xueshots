@@ -37,6 +37,7 @@ let pointerType = null;
 let autoSlideTimer = null;
 let isAutoSlidePausedByUser = false;
 let resizeTimeout = 0;
+let transitionFallbackTimer = 0;
 
 function forceCarouselImagesVisible() {
   document.querySelectorAll(".carousel-slide img").forEach((image) => {
@@ -50,6 +51,26 @@ function normalizeCurrentIndex() {
     currentIndex = slides.length - 2;
   } else if (currentIndex >= slides.length - 1) {
     currentIndex = 1;
+  }
+}
+
+function getSafeTargetIndex(index) {
+  if (index < 0) return slides.length - 2;
+  if (index > slides.length - 1) return 1;
+  return index;
+}
+
+function completeSlideTransition() {
+  clearTimeout(transitionFallbackTimer);
+  transitionFallbackTimer = 0;
+  isAnimating = false;
+  forceCarouselImagesVisible();
+
+  if (!slides[currentIndex] || slides[currentIndex].classList.contains("clone")) {
+    track.style.transition = "none";
+    normalizeCurrentIndex();
+    currentTranslate = -currentIndex * slideWidth;
+    setTranslate(currentTranslate, false);
   }
 }
 
@@ -387,11 +408,14 @@ window.addEventListener("keydown", (e) => {
    TRANSLATION
 ============================ */
 function setTranslate(value, animate = true, options = {}) {
+  clearTimeout(transitionFallbackTimer);
+
   if (animate) {
     isAnimating = true;
     const duration = options.duration ?? 700;
     const easing = options.easing ?? "cubic-bezier(0.4, 0, 0.2, 1)";
     track.style.transition = `transform ${duration}ms ${easing}`;
+    transitionFallbackTimer = window.setTimeout(completeSlideTransition, duration + 120);
   } else {
     track.style.transition = "none";
   }
@@ -400,8 +424,9 @@ function setTranslate(value, animate = true, options = {}) {
 }
 
 function moveToSlide(index, options = {}) {
-  currentIndex = index;
+  currentIndex = getSafeTargetIndex(index);
   currentTranslate = -currentIndex * slideWidth;
+  forceCarouselImagesVisible();
   setTranslate(currentTranslate, true, options);
 }
 
@@ -410,21 +435,7 @@ function moveToSlide(index, options = {}) {
 ============================ */
 track.addEventListener("transitionend", (event) => {
   if (event.target !== track || event.propertyName !== "transform") return;
-
-  isAnimating = false;
-
-  if (slides[currentIndex].classList.contains("clone")) {
-    track.style.transition = "none";
-
-    if (currentIndex === slides.length - 1) {
-      currentIndex = 1;
-    } else if (currentIndex === 0) {
-      currentIndex = slides.length - 2;
-    }
-
-    currentTranslate = -currentIndex * slideWidth;
-    setTranslate(currentTranslate, false);
-  }
+  completeSlideTransition();
 });
 
 /* ============================
