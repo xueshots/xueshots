@@ -36,6 +36,22 @@ let isAnimating = false;
 let pointerType = null;
 let autoSlideTimer = null;
 let isAutoSlidePausedByUser = false;
+let resizeTimeout = 0;
+
+function forceCarouselImagesVisible() {
+  document.querySelectorAll(".carousel-slide img").forEach((image) => {
+    image.dataset.keepLoaded = "true";
+    image.classList.add("is-loaded");
+  });
+}
+
+function normalizeCurrentIndex() {
+  if (currentIndex <= 0) {
+    currentIndex = slides.length - 2;
+  } else if (currentIndex >= slides.length - 1) {
+    currentIndex = 1;
+  }
+}
 
 /* ============================
    CLONE SLIDES (INFINITE)
@@ -50,6 +66,7 @@ track.appendChild(firstClone);
 track.insertBefore(lastClone, slides[0]);
 
 slides = Array.from(document.querySelectorAll(".carousel-slide"));
+forceCarouselImagesVisible();
 
 /* ============================
    INITIAL POSITION
@@ -142,10 +159,22 @@ function syncHomeViewportMetrics() {
 }
 
 function syncCarouselPosition() {
+  normalizeCurrentIndex();
   slideWidth = getCarouselWidth();
   currentTranslate = -currentIndex * slideWidth;
   isAnimating = false;
+  forceCarouselImagesVisible();
   setTranslate(currentTranslate, false);
+}
+
+function handleCarouselResize() {
+  stopAutoSlide();
+  syncCarouselPosition();
+
+  clearTimeout(resizeTimeout);
+  resizeTimeout = window.setTimeout(() => {
+    startAutoSlide();
+  }, 200);
 }
 
 function updateIntroCrop() {
@@ -192,12 +221,12 @@ updateIntroCrop();
 syncCarouselPosition();
 window.addEventListener('resize', updateIntroCrop);
 window.addEventListener("resize", syncHomeViewportMetrics);
-window.addEventListener("resize", syncCarouselPosition);
+window.addEventListener("resize", handleCarouselResize);
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", syncHomeViewportMetrics);
   window.visualViewport.addEventListener("resize", updateIntroCrop);
-  window.visualViewport.addEventListener("resize", syncCarouselPosition);
+  window.visualViewport.addEventListener("resize", handleCarouselResize);
   window.visualViewport.addEventListener("scroll", syncHomeViewportMetrics);
 }
 
@@ -379,7 +408,9 @@ function moveToSlide(index, options = {}) {
 /* ============================
    TRANSITION END (INFINITE FIX)
 ============================ */
-track.addEventListener("transitionend", () => {
+track.addEventListener("transitionend", (event) => {
+  if (event.target !== track || event.propertyName !== "transform") return;
+
   isAnimating = false;
 
   if (slides[currentIndex].classList.contains("clone")) {
@@ -399,21 +430,7 @@ track.addEventListener("transitionend", () => {
 /* ============================
    RESIZE
 ============================ */
-let resizeTimeout;
-
-window.addEventListener("resize", () => {
-  // Stop auto-slide during resize
-  stopAutoSlide();
-  syncCarouselPosition();
-
-  // Clear previous timeout
-  clearTimeout(resizeTimeout);
-
-  // Resume auto-slide after 200ms of no resizing
-  resizeTimeout = setTimeout(() => {
-    startAutoSlide();
-  }, 200);
-});
+window.addEventListener("pageshow", handleCarouselResize);
 
 /* ============================
    TRACKPAD SWIPE (LAPTOP)

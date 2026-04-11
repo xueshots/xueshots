@@ -509,6 +509,13 @@ main {
   transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.js .carousel-slide img:not(.lightbox-image),
+.js .carousel-slide img.is-loaded:not(.lightbox-image) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: none;
+}
+
 /* =============================
    HOMEPAGE INTRO SLIDE
 ============================= */
