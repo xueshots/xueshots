@@ -135,6 +135,9 @@ const IMG_RATIO = IMG_W / IMG_H;
 const X_STOP = 0.47;
 const Y_TOP_STOP = 0.02;
 const Y_BOT_STOP = 0.36;
+const DESKTOP_ZOOM_QUERY = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1024px)");
+const INITIAL_DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1;
+let desktopUnzoomedViewportSize = null;
 
 function getVisibleViewportSize() {
   if (window.visualViewport) {
@@ -150,10 +153,31 @@ function getVisibleViewportSize() {
   };
 }
 
+function isDesktopBrowserZoomed() {
+  if (!DESKTOP_ZOOM_QUERY.matches) return false;
+  return Math.abs((window.devicePixelRatio || 1) - INITIAL_DEVICE_PIXEL_RATIO) > 0.01;
+}
+
+function getHomeLayoutViewportSize() {
+  const visibleSize = getVisibleViewportSize();
+
+  if (!DESKTOP_ZOOM_QUERY.matches) {
+    desktopUnzoomedViewportSize = null;
+    return visibleSize;
+  }
+
+  if (!desktopUnzoomedViewportSize || !isDesktopBrowserZoomed()) {
+    desktopUnzoomedViewportSize = visibleSize;
+  }
+
+  return isDesktopBrowserZoomed() ? desktopUnzoomedViewportSize : visibleSize;
+}
+
 function syncHomeViewportMetrics() {
-  const { height } = getVisibleViewportSize();
+  const { width, height } = getHomeLayoutViewportSize();
   const controlsGap = Math.max(18, Math.min(44, Math.round(height * 0.04)));
 
+  rootStyle.setProperty("--home-viewport-width", `${width}px`);
   rootStyle.setProperty("--home-viewport-height", `${height}px`);
   rootStyle.setProperty("--home-carousel-controls-gap", `${controlsGap}px`);
 }
@@ -169,6 +193,7 @@ function syncCarouselPosition() {
 
 function handleCarouselResize() {
   stopAutoSlide();
+  syncHomeViewportMetrics();
   syncCarouselPosition();
 
   clearTimeout(resizeTimeout);

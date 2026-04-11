@@ -626,6 +626,9 @@ body.page.home .site-header {
   flex-direction: column;
   justify-content: center;
   position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--home-viewport-width, 100%);
   height: var(--home-viewport-height, 100dvh);
   min-height: var(--home-viewport-height, 100dvh);
   box-sizing: border-box;
