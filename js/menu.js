@@ -12,6 +12,8 @@ const MOBILE_MENU_SCROLL_TOP = 84;
 const TOUCH_CONTROL_FLASH_HOLD_MS = 140;
 const touchControlFlashTimers = new WeakMap();
 
+document.documentElement.classList.toggle("home-page-root", body.classList.contains("home"));
+
 function triggerTouchControlFlash(control) {
   if (!control) return;
 
@@ -737,15 +739,12 @@ window.addEventListener("resize", () => {
    SCROLL TO TOP
 ============================ */
 function initScrollToTop() {
-  if (
-    document.body.classList.contains("about") ||
-    document.body.classList.contains("contact") ||
-    document.body.classList.contains("sports") ||
-    document.body.classList.contains("landscape") ||
-    document.body.classList.contains("wildlife")
-  ) {
+  if (!document.body.classList.contains("writing")) {
+    document.querySelectorAll(".scroll-to-top").forEach((button) => button.remove());
     return;
   }
+
+  if (document.querySelector(".scroll-to-top")) return;
 
   const button = document.createElement("button");
   button.className = "scroll-to-top";

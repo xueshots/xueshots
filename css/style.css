@@ -579,9 +579,26 @@ body.page.home.dark {
 }
 
 /* Lock scroll ONLY on homepage */
+html.home-page-root {
+  height: var(--home-viewport-height, 100dvh);
+  min-height: var(--home-viewport-height, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body.page.home {
   height: var(--home-viewport-height, 100dvh);
   min-height: var(--home-viewport-height, 100dvh);
+  max-height: var(--home-viewport-height, 100dvh);
+  overflow: hidden;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+body.page.home .page-wrapper {
+  height: var(--home-viewport-height, 100dvh);
+  min-height: var(--home-viewport-height, 100dvh);
+  max-height: var(--home-viewport-height, 100dvh);
   overflow: hidden;
 }
 
